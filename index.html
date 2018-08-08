@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+
+<html>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#     # #######    #    ######
+#     # #         # #   #     #
+#     # #        #   #  #     #
+####### #####   #     # #     #
+#     # #       ####### #     #
+#     # #       #     # #     #
+#     # ####### #     # ######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+	<head>
+
+		<meta charset="utf-8">
+		<link rel="icon" href="EmerGen.gif" type="image/gif">
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+######  ######  ####### #     # ####### #     #    #    #     #  #####  #######
+#     # #     # #     # #     # #       ##    #   # #   ##    # #     # #
+#     # #     # #     # #     # #       # #   #  #   #  # #   # #       #
+######  ######  #     # #     # #####   #  #  # #     # #  #  # #       #####
+#       #   #   #     #  #   #  #       #   # # ####### #   # # #       #
+#       #    #  #     #   # #   #       #    ## #     # #    ## #     # #
+#       #     # #######    #    ####### #     # #     # #     #  #####  #######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+		<script type="text/javascript" language="javascript">
+const __date       = "20180806"
+const __author     = "jlettvin"
+const __maintainer = "jlettvin"
+const __email      = "jlettvin@gmail.com"
+const __copyright  = "Copyright(c) 2018 Jonathan D. Lettvin, All Rights Reserved"
+const __license    = "GPL V3.0"
+const __status     = "Experiment"
+const __version    = "0.0.1"
+		</script>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+####### #     # ######  ####### #######
+   #    #     # #     # #       #                     #   ####
+   #    #     # #     # #       #                     #  #
+   #    ####### ######  #####   #####                 #   ####
+   #    #     # #   #   #       #         ###         #       #
+   #    #     # #    #  #       #         ###    #    #  #    #
+   #    #     # #     # ####### #######   ###     ####    ####
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+		<script
+			type="text/javascript"
+			src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.min.js"
+		></script>
+		<script
+			type="text/javascript"
+			src="https://threejs.org/examples/js/controls/OrbitControls.js"
+		></script>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ #####  ####### #     # #       #######
+#     #    #     #   #  #       #
+#          #      # #   #       #
+ #####     #       #    #       #####
+      #    #       #    #       #
+#     #    #       #    #       #
+ #####     #       #    ####### #######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+		<style>
+/* --------------------------------------------------------------------------- */
+/* tag */
+body {
+	background    : #333300;
+	margin        : 1px;
+	padding       : 0;
+}
+h1, h2 {
+	margin        : 0;
+	padding       : 0;
+}
+h1 {
+	text-align    : center;
+	font-size     : 30px;
+}
+textarea {
+	width         : 100%;
+	max-width     : 100%;
+	height        : 200px;
+	max-height    : 100%;
+}
+canvas {
+	padding       : 0px auto;
+	margin        : 10px;
+	border        : 2px groove #3377bb;
+	margin-left   : auto;
+	margin-right  : auto;
+	display       : block;
+	background    : #7f7f7f;
+	height        : 201px;
+	width         : 201px;
+}
+table {
+	background    : black;
+}
+/* --------------------------------------------------------------------------- */
+/* id */
+#visualization {
+	background    : url("grid.png");
+}
+#footer {
+	clear         : both;
+	border        : 1px groove #aaaaaa;
+	background    : blue;
+	color         : White;
+	padding       : 0;
+	text-align    : center;
+	vertical-align: middle;
+	line-height   : normal;
+	margin        : 0;
+	position      : fixed;
+	bottom        : 0px;
+	width         : 100%;
+}
+#source {
+	width         : 100%;
+	height        : 256px;
+}
+#problem {
+	width         : 100%;
+	height        : 20px;
+}
+/* --------------------------------------------------------------------------- */
+/* class */
+.RGBR { color: #ff7777; }
+.RGBG { color: #77ff77; }
+.RGBB { color: #7777ff; }
+/* --------------------------------------------------------------------------- */
+		</style>
+    </head>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+######  ####### ######  #     #
+#     # #     # #     #  #   #
+#     # #     # #     #   # #
+######  #     # #     #    #
+#     # #     # #     #    #
+#     # #     # #     #    #
+######  ####### ######     #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<body>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #######   ###   ####### #       #######
+       #       #       #    #       #
+       #       #       #    #       #
+       #       #       #    #       #####
+       #       #       #    #       #
+       #       #       #    #       #
+       #      ###      #    ####### #######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+		<h1>
+			<abbr title="1) colony members. 2) setting for activity">
+				<span class="RGBB">Emer</span>
+				<span class="RGBG">Gen</span>
+				<span class="RGBR">Tium</span>
+			</abbr>
+		</h1>>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #     #   ###    #####  #     #    #    #         ###   ####### #######
+    #     #    #    #     # #     #   # #   #          #         #  #
+    #     #    #    #       #     #  #   #  #          #        #   #
+    #     #    #     #####  #     # #     # #          #       #    #####
+     #   #     #          # #     # ####### #          #      #     #
+      # #      #    #     # #     # #     # #          #     #      #
+       #      ###    #####   #####  #     # #######   ###   ####### #######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+		<table width="100%">
+			<tr><td>
+				<h2 class="RGBB">
+					<abbr title="results of execution appear in the gray canvas">
+					VISUALIZE:
+					</abbr>
+				</h2>
+			</td><td align="right">
+				<button
+					id="buttonTime"
+					onclick="document.jlettvin.emergent.eventTime ();"
+					<abbr title="toggle model execution">
+					MOVE
+					</abbr>
+				</button>
+				<button
+					id="buttonTalk"
+					onclick="document.jlettvin.emergent.eventTalk ();"
+					<abbr title="toggle javascript console logging">
+					TALK</button>
+					</abbr>
+			</td></tr>
+			<tr><td colspan="2" id="visualization">
+				<abbr title="place to observe colony emergent behavior">
+        			<canvas id="manifold">
+					</canvas>
+				</abbr>
+			</td></tr>
+		</table>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+######  ######  #######  #####  ######     #    #     #
+#     # #     # #     # #     # #     #   # #   ##   ##
+#     # #     # #     # #       #     #  #   #  # # # #
+######  ######  #     # #  #### ######  #     # #  #  #
+#       #   #   #     # #     # #   #   ####### #     #
+#       #    #  #     # #     # #    #  #     # #     #
+#       #     # #######  #####  #     # #     # #     #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+		<h2 class="RGBG">
+			<abbr title="cut/paste or type program into the textarea below">
+			PROGRAM:
+			</abbr>
+		</h2>
+		<form>
+			<abbr title="code to be executed by colony members">
+			<textarea
+				id="source"
+				onkeyup="document.jlettvin.emergent.main ();"
+				placeholder="Enter RPN programs here">
+"Quoted strings are comments!"
+.rpn          "Parse the program as RPN primitives (default)"
+#20[1,1]      "Make 3x3 mesh (radius 1 from [0,0]) shown 20 frames per second"
+
+$[1,:]        "In the last column, assign the following program to all cells"
+2 3 + =A      "Add two numbers and store them in register A"
+@A 5 - =@     "Subtract a number from register A and store as cell value"
+
+$[-1:0,:]     "For all columns except the last"
+9 =@          "Store 9 as cell value"
+
+$[-1,+1]      "At absolute upper left corner" 
+@[0,0]B =@    "Store last value from center cell register B as cell value"
+
+.             "Run the programs in an infinite loop"
+			</textarea>
+			</abbr>
+		</form>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+######  ######  ####### ######  #       ####### #     #
+#     # #     # #     # #     # #       #       ##   ##
+#     # #     # #     # #     # #       #       # # # #
+######  ######  #     # ######  #       #####   #  #  #
+#       #   #   #     # #     # #       #       #     #
+#       #    #  #     # #     # #       #       #     #
+#       #     # ####### ######  ####### ####### #     #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+		<h2 class="RGBR">
+			<abbr title="Error messages appear here">
+			PROBLEM:
+			</abbr>
+		</h2>
+		<textarea id="problem" placeholder="No problems"></textarea>
+		<div class="footer" id="footer">
+			<abbr title="email: jlettvin@gmail.com">
+			EmerGen&trade;Copyright&copy;2018 Jonathan D. Lettvin, All Rights Reserved.
+			</abbr>
+		</div>
+
+	</body>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      #    #    #     #    #     #####   #####  ######    ###   ######  #######
+      #   # #   #     #   # #   #     # #     # #     #    #    #     #    #
+      #  #   #  #     #  #   #  #       #       #     #    #    #     #    #
+      # #     # #     # #     #  #####  #       ######     #    ######     #
+#     # #######  #   #  #######       # #       #   #      #    #          #
+#     # #     #   # #   #     # #     # #     # #    #     #    #          #
+ #####  #     #    #    #     #  #####   #####  #     #   ###   #          #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<script type="text/javascript" language="javascript">
+"use strict";
+// emergent: a mesh of computer simulations for modeling emergent behavior
+
+window.onload = (function (win, doc) {
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ #####  ####### ####### #     # ######
+#     # #          #    #     # #     #
+#       #          #    #     # #     #
+ #####  #####      #    #     # ######
+      # #          #    #     # #
+#     # #          #    #     # #
+ #####  #######    #     #####  #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	console.clear ();
+	var message = [];
+
+	doc.jlettvin = doc.jlettvin || {};
+	doc.jlettvin.emergent = doc.jlettvin.emergent || {};
+	doc.jlettvin.emergent.data0 = doc.jlettvin.emergent.data0 || {
+		pi       : Math.PI,
+		twopi    : Math.PI*2,
+		talking  : true,
+		REGISTER : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+		shape    : [1,1,1],
+		Rb       : 5,
+		Rc       : 5,
+		Wl       : 2,
+		manifold: {
+			scene: null,
+			camera: null,
+			renderer: null,
+			controls: null,
+		},
+		EmerGen: {
+			scale: 1,
+			coeff: 0.02,
+			opacity: 1,
+			R:10,
+			nodes: [],
+		},
+		button: {
+			element: document.getElementById("buttonTime"),
+			pause: true,
+		},
+	};
+
+	var data0  = doc.jlettvin.emergent.data0;
+
+	data0.EmerGen.X = data0.EmerGen.Y = data0.EmerGen.Z = data0.EmerGen.R;
+	data0.EmerGen.radius = Math.sqrt(
+		data0.EmerGen.X**2 + data0.EmerGen.Y**2 + data0.EmerGen.Z**2
+	);
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+####### #     #   ###   #######
+#        #   #     #       #
+#         # #      #       #
+#####      #       #       #
+#         # #      #       #
+#        #   #     #       #
+####### #     #   ###      #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	function exit ( status ) {
+		// http://kevin.vanzonneveld.net
+		// +   original by: Brett Zamir (http://brettz9.blogspot.com)
+		// +      input by: Paul
+		// +   bugfixed by: Hyam Singer (http://www.impact-computing.com/)
+		// +   improved by: Philip Peterson
+		// +   bugfixed by: Brett Zamir (http://brettz9.blogspot.com)
+		// %        note 1: expirimental. Please comment on this function.
+		// *     example 1: exit();
+		// *     returns 1: null
+
+		var i;
+
+		if (typeof status === 'string') {
+			alert(status);
+		}
+
+		window.addEventListener(
+			'error',
+			function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+			},
+			false);
+
+		var handlers = [
+			'copy', 'cut', 'paste',
+			'beforeunload', 'blur', 'change', 'click', 'contextmenu', 'dblclick',
+			'focus', 'keydown', 'keypress', 'keyup', 'mousedown', 'mousemove',
+			'mouseout', 'mouseover', 'mouseup', 'resize', 'scroll',
+			'DOMNodeInserted', 'DOMNodeRemoved', 'DOMNodeRemovedFromDocument',
+			'DOMNodeInsertedIntoDocument', 'DOMAttrModified',
+			'DOMCharacterDataModified', 'DOMElementNameChanged',
+			'DOMAttributeNameChanged', 'DOMActivate', 'DOMFocusIn',
+			'DOMFocusOut', 'online', 'offline', 'textInput',
+			'abort', 'close', 'dragdrop', 'load', 'paint', 'reset', 'select',
+			'submit', 'unload'
+		];
+
+		function stopPropagation (e) {
+			e.stopPropagation();
+			// e.preventDefault(); // Stop for the form controls, etc., too?
+		}
+		for (i=0; i < handlers.length; i++) {
+			window.addEventListener(
+				handlers[i], function (e) {
+					stopPropagation(e);
+				},
+				true);
+		}
+
+		if (window.stop) {
+			window.stop();
+		}
+
+		throw '';
+	}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ###   #     # ####### ######  #######  #####  ######  #######  #####  #######
+   #    ##    #    #    #     # #     # #     # #     # #       #     #    #
+   #    # #   #    #    #     # #     # #       #     # #       #          #
+   #    #  #  #    #    ######  #     #  #####  ######  #####   #          #
+   #    #   # #    #    #   #   #     #       # #       #       #          #
+   #    #    ##    #    #    #  #     # #     # #       #       #     #    #
+  ###   #     #    #    #     # #######  #####  #       #######  #####     #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	function introspect () {
+		// Enables easier introspection for the EmerGen user.
+		var I = arguments.length;
+		if (I > 0) {
+			var fun = arguments[0];
+			var args = [];
+			for (var i=1; arguments[i]; ++i) args.push (arguments[i]);
+			pushCall (fun.name);
+			fun.apply (null, args);
+			pullCall (fun.name);
+		}
+	}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#     #    #    #     #   ###   ####### ####### #       ######
+##   ##   # #   ##    #    #    #       #     # #       #     #
+# # # #  #   #  # #   #    #    #       #     # #       #     #
+#  #  # #     # #  #  #    #    #####   #     # #       #     #
+#     # ####### #   # #    #    #       #     # #       #     #
+#     # #     # #    ##    #    #       #     # #       #     #
+#     # #     # #     #   ###   #       ####### ####### ######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	var initializeManifold = function () {
+		data0.manifold.scene    = new THREE.Scene ();
+		data0.manifold.camera   = new THREE.PerspectiveCamera (50, 1, 0.1, 1000);
+		data0.manifold.renderer = new THREE.WebGLRenderer (
+			{canvas: manifold, alpha: true});
+		data0.manifold.controls = new THREE.OrbitControls (
+			data0.manifold.camera, data0.manifold.renderer.domElement);
+
+		data0.manifold.camera.position.z = 50*data0.EmerGen.scale;
+		data0.manifold.renderer.setClearColor ( 0x7f7f7f, 0.5 );
+		data0.manifold.renderer.setSize (501, 501);
+
+		var place = function (the) {
+			var color    = new THREE.Color (the.r, the.g, the.b);
+			var geometry = new THREE.BoxGeometry (the.dx, the.dy, the.dz);
+			var material = new THREE.MeshLambertMaterial ({
+				emissive: color,
+				emissiveIntensity: 1,
+				transparent: the.t,
+				opacity: the.o
+			});
+			var mesh = new THREE.Mesh (geometry, material);
+			the.mesh = mesh;
+			mesh.position.set (the.x,the.y,the.z);
+			data0.manifold.scene.add (mesh);
+		}
+
+		for (var Z=data0.EmerGen.Z, z=-Z; z<=Z; z++) {
+			for (var Y=data0.EmerGen.Y, y=-Y; y<=Y; y++) {
+				for (var X=data0.EmerGen.X, x=-X; x<=X; x++) {
+
+					var radius = Math.sqrt (x*x+y*y+z*z);
+
+					// Object is a callable function (for update)
+					var node = function () {
+						var r = node.r = Math.random ();
+						var g = node.g = Math.random ();
+						var b = node.b = Math.random ();
+						node.mesh.material.color.setRGB (r, g, b);
+					};
+
+					node.r = Math.random ();
+					node.g = Math.random ();
+					node.b = Math.random ();
+					// Absolute corner indices
+					node.X = x+X;
+					node.Y = y+Y;
+					node.Z = z+Z,
+					node.x = x*data0.EmerGen.scale;
+					node.y = y*data0.EmerGen.scale;
+					node.z = z*data0.EmerGen.scale;
+					node.dx = 0.5;
+					node.dy = 0.25;
+					node.dz = 0.125;
+					node.radius = radius;
+					node.o = data0.EmerGen.opacity;
+					node.t = true;
+					node.mesh =  null;
+					data0.EmerGen.nodes.push (node);
+				}
+			}
+		}
+
+		for (var node of data0.EmerGen.nodes) place (node);
+	}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   #    #     #   ###   #     #    #    ####### #######
+  # #   ##    #    #    ##   ##   # #      #    #
+ #   #  # #   #    #    # # # #  #   #     #    #
+#     # #  #  #    #    #  #  # #     #    #    #####
+####### #   # #    #    #     # #######    #    #
+#     # #    ##    #    #     # #     #    #    #
+#     # #     #   ###   #     # #     #    #    #######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    var animate = function () {
+		//console.log ("animate");
+		if (!data0.button.pause) requestAnimationFrame (animate);
+		data0.manifold.renderer.render (
+			data0.manifold.scene,
+			data0.manifold.camera);
+		for (var node of data0.EmerGen.nodes) {
+			node ();
+		}
+		data0.manifold.controls.update ();
+    }
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#######                          #####
+#        #    #  ######  #####  #     #  ######  #    #
+#        ##  ##  #       #    # #        #       ##   #
+#####    # ## #  #####   #    # #  ####  #####   # #  #
+#        #    #  #       #####  #     #  #       #  # #
+#        #    #  #       #   #  #     #  #       #   ##
+#######  #    #  ######  #    #  #####   ######  #    #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	//***************************************************************************
+	var pushCall = function (msg) {
+		message.push (msg);
+		var say = doc.getElementById ("problem").innerHTML = "PUSHED: "+msg;
+		if (data0.talking) console.log (say);
+	};
+
+	//***************************************************************************
+	var pullCall = function (msg) {
+		var fault = false;
+		var current = doc.getElementById ("problem");
+		current.innerHTML = '';
+		var future = '';
+		if (message.length > 0) {
+			var last = message.pop ();
+			if (last != msg) {
+				fault = true;
+				future = "unmatched push/pull";
+			}
+			if (message.length > 0) {
+				future = "PULLED: " + msg;
+			}
+		}
+		doc.getElementById ("problem").innerHTML = future;
+		if (data0.talking) console.log (future);
+		if (fault) exit (future);
+	};
+
+	//***************************************************************************
+	var verbose = function () {
+		if (data0.talking) {
+			var I = arguments.length;
+			var display = '';
+			for (var i=0; i<I; ++i) { display += ' ' + arguments[i]; }
+			console.log (display);
+		}
+	};
+
+	//***************************************************************************
+	var eventTime = function () {
+		message.push ("eventTime");
+		console.log ("TIME");
+		data0.button.pause = !data0.button.pause;
+		data0.button.element.innerHTML = data0.button.pause ? "MOVE" : "STOP";
+		if (!data0.button.pause) animate ();
+	};
+
+	//***************************************************************************
+	var eventTalk = function () {
+		console.log ("TALK");
+		data0.talking = !data0.talking;
+		doc.getElementById("buttonTalk").innerHTML =
+			data0.talking ? "MUTE" : "TALK";
+		//main ();
+	};
+
+	//***************************************************************************
+
+	var integer;
+
+	//TODO update machine to enable access from these functions
+	//***************************************************************************
+	var LOLdigit0 = function (machine, chr) {
+		integer = chr.charCodeAt(chr) - 0x30;
+	};
+
+	//***************************************************************************
+	var LOLdigitN = function (machine, chr) {
+		integer = integer * 10 + chr.charCodeAt(chr) - 0x30;
+	};
+
+	//***************************************************************************
+	var LOLPUSHint = function (machine, chr) {
+		machine.PUSH (integer);
+	};
+
+	//***************************************************************************
+	var LOLADD = function (machine, chr) {
+		var A = machine.POP ();
+		var B = machine.POP ();
+		machine.PUSH (A+B);
+	};
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ #####                                  #######
+#     #   #####    ##     #####  ######    #       ##    #####   #       ######
+#           #     #  #      #    #         #      #  #   #    #  #       #
+ #####      #    #    #     #    #####     #     #    #  #####   #       #####
+      #     #    ######     #    #         #     ######  #    #  #       #
+#     #     #    #    #     #    #         #     #    #  #    #  #       #
+ #####      #    #    #     #    ######    #     #    #  #####   ######  ######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	// Character class names/indices bidirectional association
+	var cclass = {};
+	// Character classes (like SPACE, DIGIT, PUNCT) associate chars with class
+	var cchars = {};
+	// Character table where ctable[ord(char)] is character class
+	var ctable = new Uint8Array (256);
+
+	// State table vector (state value indexes this vector)
+	var stable = [];
+	// state names/indices bidirectional association
+	var snames = {};
+	// specification for transitions to fill tables
+	var transitions = { // All states must be initialized here as follows.
+		"error": [],
+		"home": [],
+		"integer": []
+	};
+
+	//***************************************************************************
+	var initializeStateTables = function () {
+		var counter;
+		var transcount = Object.keys (transitions).length;
+
+		verbose ("\tINITIALIZE CHARACTER CLASSES");
+		cclass[0] = "FINAL"; cclass["FINAL"] = 0;
+		cclass[1] = "SPACE"; cclass["SPACE"] = 1;
+		cclass[2] = "DIGIT"; cclass["DIGIT"] = 2;
+		cclass[3] = "UPPER"; cclass["UPPER"] = 3;
+		cclass[4] = "LOWER"; cclass["LOWER"] = 4;
+		cclass[5] = "PUNCT"; cclass["PUNCT"] = 5;
+
+		verbose ("\tINITIALIZE CHARACTER SETS");
+		cchars["FINAL"] = "";
+		cchars["SPACE"] = "\t\n\r\f ";
+		cchars["DIGIT"] = "0123456789";
+		cchars["UPPER"] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		cchars["LOWER"] = "abcdefghijklmnopqrstuvwxyz";
+		cchars["PUNCT"] = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+		verbose ("\tINITIALIZE CHARACTER CLASS TABLE");
+		for (var key in cchars) {
+			var val = cchars[key];
+			var cls = cclass[key];
+			for (var c of val) ctable[c.charCodeAt(0)] = cls;
+		}
+
+		verbose ("\tINITIALIZE TRANSITIONS DESCRIPTORS");
+		transitions["home"   ].push (
+			["home"   , cchars["SPACE"], null, null      ]);
+		transitions["home"   ].push (
+			["integer", cchars["DIGIT"], null, LOLdigit0 ]);
+		transitions["integer"].push (
+			["integer", cchars["DIGIT"], null, LOLdigitN ]);
+		transitions["integer"].push (
+			["home"   , cchars["SPACE"], null, LOLPUSHint]);
+
+		verbose ("\tINITIALIZE TRANSITIONS TABLE TO ZEROS");
+		for (var N=transcount; N--; ) stable.push (new Uint8Array (256));
+
+		verbose ("\tINITIALIZE TRANSITIONS TABLE STATE NAMES");
+		counter = 0;
+		for (var key in transitions) {
+			snames[key] = counter; snames[counter] = key;
+			++counter;
+		}
+
+		verbose ("\tINITIALIZE TRANSITIONS TABLE STATE TABLES");
+		counter = 0;
+		for (var key in transitions) {
+			var trn = transitions[key];
+			var table = stable[counter];
+			for (var tuple of trn) {
+				var tgtname = tuple[0];
+				var chr = tuple[1];
+				var target = snames[tgtname];
+				for (var c of chr) table[c.charCodeAt(0)] = target;
+				// console.log (counter, "transition", tgtname, target, key, tuple);
+			}
+			++counter;
+		}
+	}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ######     #    ######   #####  #######
+    #     #   # #   #     # #     # #
+    #     #  #   #  #     # #       #
+    ######  #     # ######   #####  #####
+    #       ####### #   #         # #
+    #       #     # #    #  #     # #
+    #       #     # #     #  #####  #######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	//***************************************************************************
+	var parse = function () {
+		console.log ("PARSER 2");
+		var source =  doc.getElementById ("source").value;
+		var count = source.length;
+		var state = 1;
+		var stack = [state];
+		var error = [];
+		var chr, ord;
+		for (var n=0; n<count && error.length === 0; ++n) {
+			chr = source[n];
+			ord = chr.charCodeAt (0);
+			var prior = state;
+
+			var state = stack[stack.length-1];
+			var next = stable[state][ord];
+			console.log ("STATE:", ord, prior, state, next);
+			switch (state) {
+				case 0:  // TERMINAL STATE
+					error.push ("terminal");
+					break;
+				case 1:  // BASE STATE
+					console.log (chr, cclass[ctable[ord]]);
+					break;
+				default:
+					error.push ("UKNOWN STATE", state);
+					break;
+			}
+		}
+	};
+
+	//***************************************************************************
+	var run = function () {
+	};
+
+	//***************************************************************************
+	var show = function () {
+	};
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#     #    #      ###   #     #
+##   ##   # #      #    ##    #
+# # # #  #   #     #    # #   #
+#  #  # #     #    #    #  #  #
+#     # #######    #    #   # #
+#     # #     #    #    #    ##
+#     # #     #   ###   #     #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	var main = function () {
+		console.log ("MAIN: with parse disabled");
+		introspect (initializeStateTables);
+		initializeManifold ();
+		animate ();
+		//introspect (parse);
+		//introspect (run);
+		//introspect (show);
+		//introspect (manifold);
+	};
+
+	doc.jlettvin.emergent.main = main;
+	doc.jlettvin.emergent.eventTime = eventTime;
+	doc.jlettvin.emergent.eventTalk = eventTalk;
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+####### #     # ####### ######  #     # ######  #######   ###   #     # #######
+#       ##    #    #    #     #  #   #  #     # #     #    #    ##    #    #
+#       # #   #    #    #     #   # #   #     # #     #    #    # #   #    #
+#####   #  #  #    #    ######     #    ######  #     #    #    #  #  #    #
+#       #   # #    #    #   #      #    #       #     #    #    #   # #    #
+#       #    ##    #    #    #     #    #       #     #    #    #    ##    #
+####### #     #    #    #     #    #    #       #######   ###   #     #    #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	introspect (doc.jlettvin.emergent.main);
+})(window, document);
+	</script>
+
+<!-- ######################################################################## -->
+<!-- ######################################################################## -->
+<!-- ######################################################################## -->
+
+</html>
