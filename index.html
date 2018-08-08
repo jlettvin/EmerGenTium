@@ -188,6 +188,8 @@ table {
 			</td><td align="right">
 				<button
 					id="buttonTime"
+					onmouseover="document.jlettvin.emergent.hintTime ();"
+					onmouseout="document.jlettvin.emergent.hoverHint ();"
 					onclick="document.jlettvin.emergent.eventTime ();"
 					<abbr title="toggle model execution">
 					MOVE
@@ -195,6 +197,8 @@ table {
 				</button>
 				<button
 					id="buttonTalk"
+					onmouseover="document.jlettvin.emergent.hintTalk ();"
+					onmouseout="document.jlettvin.emergent.hoverHint ();"
 					onclick="document.jlettvin.emergent.eventTalk ();"
 					<abbr title="toggle javascript console logging">
 					TALK</button>
@@ -264,9 +268,38 @@ $[-1,+1]      "At absolute upper left corner"
 			</abbr>
 		</h2>
 		<textarea id="problem" placeholder="No problems"></textarea>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#     #   ###   #     # #######  #####
+#     #    #    ##    #    #    #     #
+#     #    #    # #   #    #    #
+#######    #    #  #  #    #     #####
+#     #    #    #   # #    #          #
+#     #    #    #    ##    #    #     #
+#     #   ###   #     #    #     #####
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+		<h2>
+			<abbr title="Instant advice appears here">
+				HOVER HINTS
+			</abbr>
+		</h2>
+		<textarea id="hoverHints" placeholder="Nothing under mouse"></textarea>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ #####  ####### ######  #     # ######    ###    #####  #     # #######
+#     # #     # #     #  #   #  #     #    #    #     # #     #    #
+#       #     # #     #   # #   #     #    #    #       #     #    #
+#       #     # ######     #    ######     #    #  #### #######    #
+#       #     # #          #    #   #      #    #     # #     #    #
+#     # #     # #          #    #    #     #    #     # #     #    #
+ #####  ####### #          #    #     #   ###    #####  #     #    #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
 		<div class="footer" id="footer">
 			<abbr title="email: jlettvin@gmail.com">
-			EmerGen&trade;Copyright&copy;2018 Jonathan D. Lettvin, All Rights Reserved.
+			EmerGen&trade;Copyright&copy;2018
+			Jonathan D. Lettvin, All Rights Reserved.
 			</abbr>
 		</div>
 
@@ -408,6 +441,21 @@ window.onload = (function (win, doc) {
 		}
 
 		throw '';
+	}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#     # ####### #     # ####### ######  #     #   ###   #     # #######
+#     # #     # #     # #       #     # #     #    #    ##    #    #
+#     # #     # #     # #       #     # #     #    #    # #   #    #
+####### #     # #     # #####   ######  #######    #    #  #  #    #
+#     # #     #  #   #  #       #   #   #     #    #    #   # #    #
+#     # #     #   # #   #       #    #  #     #    #    #    ##    #
+#     # #######    #    ####### #     # #     #   ###   #     #    #
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	function hoverHint (msg) {
+		var element = doc.getElementById ("hoverHints");
+		element.innerHTML = msg || "";
 	}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -580,6 +628,15 @@ window.onload = (function (win, doc) {
 	};
 
 	//***************************************************************************
+	var hintTime = function () {
+		hoverHint (
+			[
+				"Clicking MOVE turns on animation.",
+				"This button is relabeled STOP.",
+				"Clicking STOP turns off animation."
+			].join("\n")
+		);
+	};
 	var eventTime = function () {
 		message.push ("eventTime");
 		console.log ("TIME");
@@ -589,6 +646,15 @@ window.onload = (function (win, doc) {
 	};
 
 	//***************************************************************************
+	var hintTalk = function () {
+		hoverHint (
+			[
+				"Clicking TALK turns on console logging.",
+				"This button is relabeled MUTE.",
+				"Clicking MUTE turns off console logging."
+			].join("\n")
+		);
+	};
 	var eventTalk = function () {
 		console.log ("TALK");
 		data0.talking = !data0.talking;
@@ -787,7 +853,10 @@ window.onload = (function (win, doc) {
 	};
 
 	doc.jlettvin.emergent.main = main;
+	doc.jlettvin.emergent.hoverHint = hoverHint;
+	doc.jlettvin.emergent.hintTime  = hintTime;
 	doc.jlettvin.emergent.eventTime = eventTime;
+	doc.jlettvin.emergent.hintTalk  = hintTalk;
 	doc.jlettvin.emergent.eventTalk = eventTalk;
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
