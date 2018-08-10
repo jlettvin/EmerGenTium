@@ -640,6 +640,9 @@ window.onload = (function (win, doc) {
 			new THREE.LineBasicMaterial ({color: 0})
 		);
 		data0.manifold.scene.add (line);
+
+		var axesHelper = new THREE.AxesHelper (2*X);
+		data0.manifold.scene.add (axesHelper);
 	}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
