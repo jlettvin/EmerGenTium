@@ -592,6 +592,11 @@ window.onload = (function (win, doc) {
 		return cell;
 	};
 
+	//var edge = function (x0, x1, y0, y1, z0, z1) {
+		//var vertex0 = new THREE Vector3 (x0, y0, z0);
+		//var vertex1 = new THREE Vector3 (x1, y1, z1);
+	//};
+
 	// --------------------------------------------------------------------------
 	var initializeManifold = function () {
 		data0.manifold.scene    = new THREE.Scene ();
@@ -608,16 +613,17 @@ window.onload = (function (win, doc) {
 		data0.grid = [];
 
 		// Generate cube[k][j][i] cube of cells.
-		for (var Z=data0.EmerGen.Z, z=-Z; z<=Z; z++) {
+		var X = data0.EmerGen.X, Y = data0.EmerGen.Y, Z = data0.EmerGen.Z;
+		for (var z=-Z; z<=Z; z++) {
 			var cube = data0.grid;
 			cube.push ([]);
 			var planes = cube.length;
-			for (var Y=data0.EmerGen.Y, y=-Y; y<=Y; y++) {
+			for (var y=-Y; y<=Y; y++) {
 				var plane = cube[planes-1];
 				plane.push ([]);
 				var lines = plane.length;
 				data0.grid[data0.grid.length-1].push ([]);
-				for (var X=data0.EmerGen.X, x=-X; x<=X; x++) {
+				for (var x=-X; x<=X; x++) {
 					var line = plane[lines-1];
 					var cell = makeCell (
 						x, y, z,
@@ -627,6 +633,13 @@ window.onload = (function (win, doc) {
 				}
 			}
 		}
+		var boxGeo = new THREE.BoxGeometry (2*X+1, 2*Y+1, 2*Z+1);
+		var edges = new THREE.EdgesGeometry (boxGeo);
+		var line = new THREE.LineSegments (
+			edges,
+			new THREE.LineBasicMaterial ({color: 0})
+		);
+		data0.manifold.scene.add (line);
 	}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
