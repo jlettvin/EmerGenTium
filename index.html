@@ -401,7 +401,7 @@ window.onload = (function (win, doc) {
 				scale: 1,
 				coeff: 0.02,
 				opacity: 1,
-				R:10,
+				R:5,
 			},
 			button: {
 				element: document.getElementById("buttonTime"),
@@ -606,20 +606,21 @@ window.onload = (function (win, doc) {
 		data0.manifold.controls = new THREE.OrbitControls (
 			data0.manifold.camera, data0.manifold.renderer.domElement);
 
-		data0.manifold.camera.position.z = 50*data0.EmerGen.scale;
+		data0.manifold.camera.position.z = data0.EmerGen.R*5*data0.EmerGen.scale;
 		data0.manifold.renderer.setClearColor ( 0x7f7f7f, 0.5 );
 		data0.manifold.renderer.setSize (501, 501);
 
 		data0.grid = [];
 
-		// Generate cube[k][j][i] cube of cells.
+		// TODO use ijk instead of xyz for corner-based coordinates
+		// Generate grid[k][j][i] cube of cells.
 		var X = data0.EmerGen.X, Y = data0.EmerGen.Y, Z = data0.EmerGen.Z;
 		for (var z=-Z; z<=Z; z++) {
-			var cube = data0.grid;
-			cube.push ([]);
-			var planes = cube.length;
+			var grid = data0.grid;
+			grid.push ([]);
+			var planes = grid.length;
 			for (var y=-Y; y<=Y; y++) {
-				var plane = cube[planes-1];
+				var plane = grid[planes-1];
 				plane.push ([]);
 				var lines = plane.length;
 				data0.grid[data0.grid.length-1].push ([]);
@@ -642,6 +643,12 @@ window.onload = (function (win, doc) {
 		data0.manifold.scene.add (line);
 
 		var axesHelper = new THREE.AxesHelper (2*X);
+		{
+			// make sure to update this on window resize
+			//var localToCameraAxesPlacement = new THREE.Vector3(
+				//0.45 * camera.aspect,-0.45,-2);
+		}
+		
 		data0.manifold.scene.add (axesHelper);
 	}
 
@@ -661,7 +668,6 @@ window.onload = (function (win, doc) {
 			for (var line of plane) {
 				for (var cell of line) {
 					cell ();
-					//if (!cell.x && !cell.y && !cell.z) console.log (cell);
 				}
 			}
 		}
@@ -669,6 +675,13 @@ window.onload = (function (win, doc) {
 			data0.manifold.scene,
 			data0.manifold.camera);
 		data0.manifold.controls.update ();
+		{
+			//var camera = getCamera();
+			//camera.updateMatrixWorld();
+			//var axesPlacement = camera.localToWorld(
+				//localToCameraAxesPlacement.clone());
+			//axisHelper.position.copy(axesPlacement);
+		}
     }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
