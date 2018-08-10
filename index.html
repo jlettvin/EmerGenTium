@@ -66,8 +66,15 @@ const __version    = "0.0.1"
  #####     #       #    ####### #######
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 		<style>
-/* --------------------------------------------------------------------------- */
-/* tag */
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	#######    #     #####
+	   #      # #   #     #
+	   #     #   #  #
+	   #    #     # #  ####
+	   #    ####### #     #
+	   #    #     # #     #
+	   #    #     #  #####
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 body {
 	background    : #333300;
 	margin        : 1px;
@@ -102,8 +109,15 @@ canvas {
 table {
 	background    : black;
 }
-/* --------------------------------------------------------------------------- */
-/* id */
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	  ###   ######
+	   #    #     #
+	   #    #     #
+	   #    #     #
+	   #    #     #
+	   #    #     #
+	  ###   ######
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 #visualization {
 	background    : url("grid.png");
 }
@@ -129,8 +143,15 @@ table {
 	width         : 100%;
 	height        : 20px;
 }
-/* --------------------------------------------------------------------------- */
-/* class */
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	 #####  #          #     #####   #####
+	#     # #         # #   #     # #     #
+	#       #        #   #  #       #
+	#       #       #     #  #####   #####
+	#       #       #######       #       #
+	#     # #       #     # #     # #     #
+	 #####  ####### #     #  #####   #####
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 .RGBR { color: #ff7777; }
 .RGBG { color: #77ff77; }
 .RGBB { color: #7777ff; }
@@ -186,6 +207,15 @@ table {
 					</abbr>
 				</h2>
 			</td><td align="right">
+				<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+				######  #     # ####### ####### ####### #     #  #####
+				#     # #     #    #       #    #     # ##    # #     #
+				#     # #     #    #       #    #     # # #   # #
+				######  #     #    #       #    #     # #  #  #  #####
+				#     # #     #    #       #    #     # #   # #       #
+				#     # #     #    #       #    #     # #    ## #     #
+				######   #####     #       #    ####### #     #  #####
+				+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 				<button
 					id="buttonTime"
 					onmouseover="document.jlettvin.emergent.hintTime ();"
@@ -205,6 +235,15 @@ table {
 					</abbr>
 			</td></tr>
 			<tr><td colspan="2" id="visualization">
+				<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+				 #####     #    #     # #     #    #     #####
+				#     #   # #   ##    # #     #   # #   #     #
+				#        #   #  # #   # #     #  #   #  #
+				#       #     # #  #  # #     # #     #  #####
+				#       ####### #   # #  #   #  #######       #
+				#     # #     # #    ##   # #   #     # #     #
+				 #####  #     # #     #    #    #     #  #####
+				+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 				<abbr title="place to observe consortium emergent behavior">
         			<canvas id="manifold">
 					</canvas>
@@ -335,45 +374,54 @@ window.onload = (function (win, doc) {
  #####  #######    #     #####  #
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-	console.clear ();
+	var data0;
 	var message = [];
 
-	doc.jlettvin = doc.jlettvin || {};
-	doc.jlettvin.emergent = doc.jlettvin.emergent || {};
-	doc.jlettvin.emergent.data0 = doc.jlettvin.emergent.data0 || {
-		pi       : Math.PI,
-		twopi    : Math.PI*2,
-		talking  : true,
-		REGISTER : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-		shape    : [1,1,1],
-		Rb       : 5,
-		Rc       : 5,
-		Wl       : 2,
-		manifold: {
-			scene: null,
-			camera: null,
-			renderer: null,
-			controls: null,
-		},
-		EmerGen: {
-			scale: 1,
-			coeff: 0.02,
-			opacity: 1,
-			R:10,
-			nodes: [],
-		},
-		button: {
-			element: document.getElementById("buttonTime"),
-			pause: true,
-		},
-	};
+	function setup () {
+		console.clear ();
 
-	var data0  = doc.jlettvin.emergent.data0;
+		doc.jlettvin = doc.jlettvin || {};
+		doc.jlettvin.emergent = doc.jlettvin.emergent || {};
+		doc.jlettvin.emergent.data0 = doc.jlettvin.emergent.data0 || {
+			pi       : Math.PI,
+			twopi    : Math.PI*2,
+			talking  : true,
+			REGISTER : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+			shape    : [1,1,1],
+			Rb       : 5,
+			Rc       : 5,
+			Wl       : 2,
+			manifold: {
+				scene: null,
+				camera: null,
+				renderer: null,
+				controls: null,
+			},
+			EmerGen: {
+				scale: 1,
+				coeff: 0.02,
+				opacity: 1,
+				R:10,
+			},
+			button: {
+				element: document.getElementById("buttonTime"),
+				pause: true,
+			},
+		};
+		data0  = doc.jlettvin.emergent.data0;
 
-	data0.EmerGen.X = data0.EmerGen.Y = data0.EmerGen.Z = data0.EmerGen.R;
-	data0.EmerGen.radius = Math.sqrt(
-		data0.EmerGen.X**2 + data0.EmerGen.Y**2 + data0.EmerGen.Z**2
-	);
+		data0.EmerGen.X = data0.EmerGen.Y = data0.EmerGen.Z = data0.EmerGen.R;
+		data0.EmerGen.radius = Math.sqrt(
+			data0.EmerGen.X**2 + data0.EmerGen.Y**2 + data0.EmerGen.Z**2
+		);
+
+		doc.jlettvin.emergent.main = main;
+		doc.jlettvin.emergent.hoverHint = hoverHint;
+		doc.jlettvin.emergent.hintTime  = hintTime;
+		doc.jlettvin.emergent.eventTime = eventTime;
+		doc.jlettvin.emergent.hintTalk  = hintTalk;
+		doc.jlettvin.emergent.eventTalk = eventTalk;
+	}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ####### #     #   ###   #######
@@ -491,6 +539,60 @@ window.onload = (function (win, doc) {
 #     # #     # #     #   ###   #       ####### ####### ######
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+	// --------------------------------------------------------------------------
+	var makeCell = function (x, y, z, r, g, b) {
+		var X = data0.EmerGen.X, Y = data0.EmerGen.Y, Z = data0.EmerGen.Z;
+		var radius = Math.sqrt (x*x+y*y+z*z);
+		var cell = function () {
+			cell.r = Math.random ();
+			cell.g = Math.random ();
+			cell.b = Math.random ();
+
+			cell.mesh.scale.x = 0.3 * Math.random ();
+			cell.mesh.scale.y = 0.3 * Math.random ();
+			cell.mesh.scale.z = 0.3 * Math.random ();
+
+			cell.material.emissive.setRGB (cell.r, cell.g, cell.b);
+			cell.geometry.verticesNeedUpdate = true;
+			cell.geometry.colorsNeedUpdate = true;
+		};
+		cell.r = r;
+		cell.g = g;
+		cell.b = b;
+		// Absolute corner indices
+		cell.X = x+X;
+		cell.Y = y+Y;
+		cell.Z = z+Z;
+		cell.x = x*data0.EmerGen.scale;
+		cell.y = y*data0.EmerGen.scale;
+		cell.z = z*data0.EmerGen.scale;
+		cell.dx = 0.5;
+		cell.dy = 0.25;
+		cell.dz = 0.125;
+		cell.radius = radius;
+		cell.o = data0.EmerGen.opacity;
+		cell.t = true;
+		cell.mesh =  null;
+
+		cell.color    = new THREE.Color (cell.r, cell.g, cell.b);
+		cell.geometry = new THREE.BoxGeometry (1, 1, 1);
+
+		cell.material = new THREE.MeshLambertMaterial ({
+			emissive: cell.color,
+			emissiveIntensity: 1,
+			transparent: cell.t,
+			opacity: cell.o
+		});
+		cell.mesh = new THREE.Mesh (cell.geometry, cell.material);
+		cell.mesh.scale.x = cell.dx;
+		cell.mesh.scale.y = cell.dy;
+		cell.mesh.scale.z = cell.dz;
+		cell.mesh.position.set (cell.x,cell.y,cell.z);
+		data0.manifold.scene.add (cell.mesh);
+		return cell;
+	};
+
+	// --------------------------------------------------------------------------
 	var initializeManifold = function () {
 		data0.manifold.scene    = new THREE.Scene ();
 		data0.manifold.camera   = new THREE.PerspectiveCamera (50, 1, 0.1, 1000);
@@ -503,58 +605,28 @@ window.onload = (function (win, doc) {
 		data0.manifold.renderer.setClearColor ( 0x7f7f7f, 0.5 );
 		data0.manifold.renderer.setSize (501, 501);
 
-		var place = function (the) {
-			var color    = new THREE.Color (the.r, the.g, the.b);
-			var geometry = new THREE.BoxGeometry (the.dx, the.dy, the.dz);
-			var material = new THREE.MeshLambertMaterial ({
-				emissive: color,
-				emissiveIntensity: 1,
-				transparent: the.t,
-				opacity: the.o
-			});
-			var mesh = new THREE.Mesh (geometry, material);
-			the.mesh = mesh;
-			mesh.position.set (the.x,the.y,the.z);
-			data0.manifold.scene.add (mesh);
-		}
+		data0.grid = [];
 
+		// Generate cube[k][j][i] cube of cells.
 		for (var Z=data0.EmerGen.Z, z=-Z; z<=Z; z++) {
+			var cube = data0.grid;
+			cube.push ([]);
+			var planes = cube.length;
 			for (var Y=data0.EmerGen.Y, y=-Y; y<=Y; y++) {
+				var plane = cube[planes-1];
+				plane.push ([]);
+				var lines = plane.length;
+				data0.grid[data0.grid.length-1].push ([]);
 				for (var X=data0.EmerGen.X, x=-X; x<=X; x++) {
-
-					var radius = Math.sqrt (x*x+y*y+z*z);
-
-					// Object is a callable function (for update)
-					var node = function () {
-						var r = node.r = Math.random ();
-						var g = node.g = Math.random ();
-						var b = node.b = Math.random ();
-						node.mesh.material.color.setRGB (r, g, b);
-					};
-
-					node.r = Math.random ();
-					node.g = Math.random ();
-					node.b = Math.random ();
-					// Absolute corner indices
-					node.X = x+X;
-					node.Y = y+Y;
-					node.Z = z+Z,
-					node.x = x*data0.EmerGen.scale;
-					node.y = y*data0.EmerGen.scale;
-					node.z = z*data0.EmerGen.scale;
-					node.dx = 0.5;
-					node.dy = 0.25;
-					node.dz = 0.125;
-					node.radius = radius;
-					node.o = data0.EmerGen.opacity;
-					node.t = true;
-					node.mesh =  null;
-					data0.EmerGen.nodes.push (node);
+					var line = plane[lines-1];
+					var cell = makeCell (
+						x, y, z,
+						Math.random (), Math.random (), Math.random ()
+					);
+					line.push (cell);  // Store node in cartesian space.
 				}
 			}
 		}
-
-		for (var node of data0.EmerGen.nodes) place (node);
 	}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -568,14 +640,18 @@ window.onload = (function (win, doc) {
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
     var animate = function () {
-		//console.log ("animate");
 		if (!data0.button.pause) requestAnimationFrame (animate);
+		for (var plane of data0.grid) {
+			for (var line of plane) {
+				for (var cell of line) {
+					cell ();
+					//if (!cell.x && !cell.y && !cell.z) console.log (cell);
+				}
+			}
+		}
 		data0.manifold.renderer.render (
 			data0.manifold.scene,
 			data0.manifold.camera);
-		for (var node of data0.EmerGen.nodes) {
-			node ();
-		}
 		data0.manifold.controls.update ();
     }
 
@@ -660,7 +736,6 @@ window.onload = (function (win, doc) {
 		data0.talking = !data0.talking;
 		doc.getElementById("buttonTalk").innerHTML =
 			data0.talking ? "MUTE" : "TALK";
-		//main ();
 	};
 
 	//***************************************************************************
@@ -776,7 +851,6 @@ window.onload = (function (win, doc) {
 				var chr = tuple[1];
 				var target = snames[tgtname];
 				for (var c of chr) table[c.charCodeAt(0)] = target;
-				// console.log (counter, "transition", tgtname, target, key, tuple);
 			}
 			++counter;
 		}
@@ -852,13 +926,6 @@ window.onload = (function (win, doc) {
 		//introspect (manifold);
 	};
 
-	doc.jlettvin.emergent.main = main;
-	doc.jlettvin.emergent.hoverHint = hoverHint;
-	doc.jlettvin.emergent.hintTime  = hintTime;
-	doc.jlettvin.emergent.eventTime = eventTime;
-	doc.jlettvin.emergent.hintTalk  = hintTalk;
-	doc.jlettvin.emergent.eventTalk = eventTalk;
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ####### #     # ####### ######  #     # ######  #######   ###   #     # #######
 #       ##    #    #    #     #  #   #  #     # #     #    #    ##    #    #
@@ -869,7 +936,9 @@ window.onload = (function (win, doc) {
 ####### #     #    #    #     #    #    #       #######   ###   #     #    #
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+	setup ();
 	introspect (doc.jlettvin.emergent.main);
+
 })(window, document);
 	</script>
 
