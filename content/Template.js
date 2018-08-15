@@ -40,11 +40,10 @@
 
 window.onload = (function (win, doc) {
 
-	doc.jlettvin = doc.jlettvin || {};
-	doc.jlettvin.emergent = doc.jlettvin.emergent || {};
-	doc.jlettvin.emergent.content = doc.jlettvin.emergent.content || {};
+	doc.EmerGen = doc.EmerGen || {};
+	doc.EmerGen.content = doc.EmerGen.content || {};
 
-	doc.jlettvin.emergent.content["Template"] = {
+	doc.EmerGen.content["Template"] = {
 		American: HEREDOC (function () { /*
 Hello.
 Goodbye.

@@ -56,9 +56,8 @@ window.onload = (function (win, doc) {
 	function setup () {
 		console.clear ();
 
-		doc.jlettvin = doc.jlettvin || {};
-		doc.jlettvin.emergent = doc.jlettvin.emergent || {};
-		doc.jlettvin.emergent.data0 = doc.jlettvin.emergent.data0 || {
+		doc.EmerGen = doc.EmerGen || {};
+		doc.EmerGen.data0 = doc.EmerGen.data0 || {
 			pi       : Math.PI,
 			twopi    : Math.PI*2,
 			talking  : true,
@@ -84,19 +83,19 @@ window.onload = (function (win, doc) {
 				pause: true,
 			},
 		};
-		data0  = doc.jlettvin.emergent.data0;
+		data0  = doc.EmerGen.data0;
 
 		data0.EmerGen.X = data0.EmerGen.Y = data0.EmerGen.Z = data0.EmerGen.R;
 		data0.EmerGen.radius = Math.sqrt(
 			data0.EmerGen.X**2 + data0.EmerGen.Y**2 + data0.EmerGen.Z**2
 		);
 
-		doc.jlettvin.emergent.main = main;
-		doc.jlettvin.emergent.hoverHint = hoverHint;
-		doc.jlettvin.emergent.hintTime  = hintTime;
-		doc.jlettvin.emergent.eventTime = eventTime;
-		doc.jlettvin.emergent.hintTalk  = hintTalk;
-		doc.jlettvin.emergent.eventTalk = eventTalk;
+		doc.EmerGen.main = main;
+		doc.EmerGen.hoverHint = hoverHint;
+		doc.EmerGen.hintTime  = hintTime;
+		doc.EmerGen.eventTime = eventTime;
+		doc.EmerGen.hintTalk  = hintTalk;
+		doc.EmerGen.eventTalk = eventTalk;
 	}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -623,7 +622,7 @@ window.onload = (function (win, doc) {
 		introspect (initializeStateTables);
 		initializeManifold ();
 		animate ();
-		doc.jlettvin.emergent.hints ();
+		doc.EmerGen.hints ();
 		//introspect (parse);
 		//introspect (run);
 		//introspect (show);
@@ -641,6 +640,6 @@ window.onload = (function (win, doc) {
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 	setup ();
-	introspect (doc.jlettvin.emergent.main);
+	introspect (doc.EmerGen.main);
 
 })(window, document);

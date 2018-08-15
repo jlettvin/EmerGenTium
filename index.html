@@ -193,18 +193,18 @@ const __version    = "0.0.1"
 				+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 				<button
 					id="buttonTime"
-					onmouseover="document.jlettvin.emergent.hintTime ();"
-					onmouseout="document.jlettvin.emergent.hoverHint ();"
-					onclick="document.jlettvin.emergent.eventTime ();"
+					onmouseover="document.EmerGen.hintTime ();"
+					onmouseout="document.EmerGen.hoverHint ();"
+					onclick="document.EmerGen.eventTime ();"
 					<abbr title="toggle model execution">
 					MOVE
 					</abbr>
 				</button>
 				<button
 					id="buttonTalk"
-					onmouseover="document.jlettvin.emergent.hintTalk ();"
-					onmouseout="document.jlettvin.emergent.hoverHint ();"
-					onclick="document.jlettvin.emergent.eventTalk ();"
+					onmouseover="document.EmerGen.hintTalk ();"
+					onmouseout="document.EmerGen.hoverHint ();"
+					onclick="document.EmerGen.eventTalk ();"
 					<abbr title="toggle javascript console logging">
 					TALK</button>
 					</abbr>
@@ -245,7 +245,7 @@ const __version    = "0.0.1"
 			<abbr title="code to be executed by consortium members">
 			<textarea
 				id="source"
-				onkeyup="document.jlettvin.emergent.main ();"
+				onkeyup="document.EmerGen.main ();"
 				placeholder="Enter RPN programs here">
 "Quoted strings are comments!"
 .rpn          "Parse the program as RPN primitives (default)"

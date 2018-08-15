@@ -10,8 +10,7 @@ function HEREDOC (f)
 
 window.onload = (function (win, doc) {
 
-	doc.jlettvin = doc.jlettvin || {};
-	doc.jlettvin.emergent = doc.jlettvin.emergent || {};
+	doc.EmerGen = doc.EmerGen || {};
 
 	function hints (target="hoverHints") {
 
@@ -48,6 +47,6 @@ It is used to narrow the scope.
 		}
 	}
 
-	doc.jlettvin.emergent.hints = hints;
+	doc.EmerGen.hints = hints;
 
 }) (window, document);
