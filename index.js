@@ -623,6 +623,7 @@ window.onload = (function (win, doc) {
 		introspect (initializeStateTables);
 		initializeManifold ();
 		animate ();
+		doc.jlettvin.emergent.hints ();
 		//introspect (parse);
 		//introspect (run);
 		//introspect (show);
