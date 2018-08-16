@@ -50,14 +50,13 @@ window.onload = (function (win, doc) {
  #####  #######    #     #####  #
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-	var data0;
-	var message = [];
+	var data0 = document.EmerGen.data0;
 
 	function setup () {
-		console.clear ();
+		//console.clear ();
 
 		doc.EmerGen = doc.EmerGen || {};
-		doc.EmerGen.data0 = doc.EmerGen.data0 || {
+		var tmp = {
 			pi       : Math.PI,
 			twopi    : Math.PI*2,
 			talking  : true,
@@ -66,24 +65,31 @@ window.onload = (function (win, doc) {
 			Rb       : 5,
 			Rc       : 5,
 			Wl       : 2,
-			manifold: {
+			content  : {
+				language : "American",
+				clicked : null,
+				hovered : null,
+			},
+			manifold : {
 				scene: null,
 				camera: null,
 				renderer: null,
 				controls: null,
 			},
-			EmerGen: {
+			EmerGen : {
 				scale: 1,
 				coeff: 0.02,
 				opacity: 1,
 				R:5,
 			},
-			button: {
+			button  : {
 				element: document.getElementById("buttonTime"),
 				pause: true,
 			},
 		};
-		data0  = doc.EmerGen.data0;
+		for (var key in tmp) {
+			data0[key] = tmp[key];
+		}
 
 		data0.EmerGen.X = data0.EmerGen.Y = data0.EmerGen.Z = data0.EmerGen.R;
 		data0.EmerGen.radius = Math.sqrt(
@@ -179,29 +185,6 @@ window.onload = (function (win, doc) {
 	function hoverHint (msg) {
 		var element = doc.getElementById ("hoverHints");
 		element.innerHTML = msg || "";
-	}
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  ###   #     # ####### ######  #######  #####  ######  #######  #####  #######
-   #    ##    #    #    #     # #     # #     # #     # #       #     #    #
-   #    # #   #    #    #     # #     # #       #     # #       #          #
-   #    #  #  #    #    ######  #     #  #####  ######  #####   #          #
-   #    #   # #    #    #   #   #     #       # #       #       #          #
-   #    #    ##    #    #    #  #     # #     # #       #       #     #    #
-  ###   #     #    #    #     # #######  #####  #       #######  #####     #
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-	function introspect () {
-		// Enables easier introspection for the EmerGen user.
-		var I = arguments.length;
-		if (I > 0) {
-			var fun = arguments[0];
-			var args = [];
-			for (var i=1; arguments[i]; ++i) args.push (arguments[i]);
-			pushCall (fun.name);
-			fun.apply (null, args);
-			pullCall (fun.name);
-		}
 	}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -366,44 +349,6 @@ window.onload = (function (win, doc) {
 #        #    #  #       #   #  #     #  #       #   ##
 #######  #    #  ######  #    #  #####   ######  #    #
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-	//***************************************************************************
-	var pushCall = function (msg) {
-		message.push (msg);
-		var say = doc.getElementById ("problem").innerHTML = "PUSHED: "+msg;
-		if (data0.talking) console.log (say);
-	};
-
-	//***************************************************************************
-	var pullCall = function (msg) {
-		var fault = false;
-		var current = doc.getElementById ("problem");
-		current.innerHTML = '';
-		var future = '';
-		if (message.length > 0) {
-			var last = message.pop ();
-			if (last != msg) {
-				fault = true;
-				future = "unmatched push/pull";
-			}
-			if (message.length > 0) {
-				future = "PULLED: " + msg;
-			}
-		}
-		doc.getElementById ("problem").innerHTML = future;
-		if (data0.talking) console.log (future);
-		if (fault) exit (future);
-	};
-
-	//***************************************************************************
-	var verbose = function () {
-		if (data0.talking) {
-			var I = arguments.length;
-			var display = '';
-			for (var i=0; i<I; ++i) { display += ' ' + arguments[i]; }
-			console.log (display);
-		}
-	};
 
 	//***************************************************************************
 	var hintTime = function () {
@@ -640,6 +585,5 @@ window.onload = (function (win, doc) {
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 	setup ();
-	introspect (doc.EmerGen.main);
 
 })(window, document);

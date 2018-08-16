@@ -42,8 +42,7 @@ window.onload = (function (win, doc) {
 
 	doc.EmerGen = doc.EmerGen || {};
 	doc.EmerGen.content = doc.EmerGen.content || {};
-
-	doc.EmerGen.content["Template"] = {
+	doc.EmerGen.content.Template = {
 		American: HEREDOC (function () { /*
 Hello.
 Goodbye.

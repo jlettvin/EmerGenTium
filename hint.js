@@ -1,13 +1,5 @@
 "use strict";
 
-//------------------------------------------------------------------------------
-// PHP and shell style HEREDOC
-function HEREDOC (f)
-//------------------------------------------------------------------------------
-{
-	return f.toString().split('\n').slice(1,-1).join('\n').normalize('NFC');
-} // HEREDOC
-
 window.onload = (function (win, doc) {
 
 	doc.EmerGen = doc.EmerGen || {};
@@ -37,12 +29,16 @@ It is used to narrow the scope.
 					var msg = hint[key];
 					if (msg) {
 						doc.getElementById (target).innerHTML = msg;
+						doc.EmerGen.data0.content.hovered = msg;
 						break;
 					}
 				}
 			});
 			element.addEventListener ("mouseleave", function (event) {
-				doc.getElementById (target).innerHTML = "";
+				var content = doc.EmerGen.data0.content;
+				var hovered = content.hovered = "";
+				var clicked = content.clicked;
+				doc.getElementById (target).innerHTML = clicked ? clicked : "";
 			});
 		}
 	}
