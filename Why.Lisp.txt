@@ -1,0 +1,60 @@
+EmerGen will model how partially independent free actors, by their
+interactions, generate patterns which emerge as perceivable patterns in
+distributions.  Independence implies that each actor can be extracted from the
+medium, studied independently, and returned to the medium without significant
+effect on the perceivable patterns.  This property is called "separability".
+
+LISP is both data and code.  Changes to the data may directly influence the
+direction code takes.
+
+An early example will help.
+
+(def 'Jonathan (
+	('address
+		(-1 -1 -1))
+	('assets
+		('cash
+			('bank 900)
+			('wallet 100)))
+	('liabilities
+		('mortgage 90000)
+		('car 10000))
+	('bills
+		('received
+			('mortgage 1000)
+			('car 100))
+		('sent
+			('Don 3 'coding)))
+	('actions
+		('monthly
+			('day 1)
+			(pay 'bills)))))
+
+(def 'Don (
+	('address
+		(1 1 1))
+	('assets
+		('cash
+			('bank 800)
+			('wallet 200)))
+	('liabilities
+		('mortgage 0)
+		('car 0))
+	('bills
+		('received
+			('vet 100)))
+	('actions
+		('monthly
+			('day 1)
+			(pay 'bills)))))
+
+Note how Jonathan and Don are both literal names defined in financial terms.
+All the current balances and sources and sinks for money are specified.
+There is also a specification for actions to be performed.
+Actions are performed through a central post office (database and scheduler).
+This improves reliability because, in case of system or code failure,
+actions can be resubmitted for execution.
+This is known as ACID (Atomicity Consistency Isolation Durability).
+
+Each defined actor can be executed anywhere that has access to
+the database and scheduler.

@@ -309,5 +309,28 @@ $[-1,+1]      "At absolute upper left corner"
 		<script type="text/javascript" src="content/Contents.js"></script>
 		<script type="text/javascript" src="main.js"></script>
 
+<script id='testLisp' type="text/lisp">
+(def E (get (js "Math") "E"))
+(def console (js "console"))
+(def log (method console "log"))
+(def EmerGen (js "document.EmerGen"))
+(def data0 (js "document.EmerGen.data0"))
+(def cube (quote (
+ ((0 0 0) (0 0 0) (0 0 0))
+ ((0 0 0) (0 0 0) (0 0 0))
+ ((0 0 0) (0 0 0) (0 0 0))
+)))
+
+(log 'hellisp)
+(log cube)
+</script>
+
+		<script type="text/javascript">
+			Javathcript.evalMulti (HEREDOC (function (){/*
+(def console (js "console"))
+(def log (method console "log"))
+*/}));
+		</script>
+
 	</body>
 </html>
