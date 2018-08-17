@@ -357,8 +357,7 @@ $[-1,+1]      "At absolute upper left corner"
 #        #    #  ######  ######   ####   #####   ###### #######  #####  #
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
-<script type="text/javascript">
-Javathcript.evalMulti (HEREDOC (function (){/*
+<script type="text/lisp">
 ; This text used to be the contents of a file called prelude.lsp.
 ; It is part of the Javathcript suite.
 ; This file contains aliases and common definitions.
@@ -442,7 +441,6 @@ Javathcript.evalMulti (HEREDOC (function (){/*
 		(import-math (lambda (funcname)
 							 (def-dyn funcname (method math funcname)))) )
 	(map import-math '(sin cos tan asin acos atan floor max min log abs ceil pow exp atan2 random sqrt round))	)
-*/}));
 </script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -455,8 +453,7 @@ Javathcript.evalMulti (HEREDOC (function (){/*
 #######   ###    #####  #               ######  ####### #        #####
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
-<script type="text/javascript">
-Javathcript.evalMulti (HEREDOC (function (){/*
+<script type="text/lisp">
 (def E (get (js "Math") "E"))
 (def console (js "console"))
 (def log (method console "log"))
@@ -472,7 +469,6 @@ Javathcript.evalMulti (HEREDOC (function (){/*
 (log cube)
 (def console (js "console"))
 (def log (method console "log"))
-*/}));
 </script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
