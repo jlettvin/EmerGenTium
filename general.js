@@ -38,7 +38,7 @@
 "use strict";
 // emergent: a mesh of computer simulations for modeling emergent behavior
 
-console.clear ();
+// console.clear ();
 
 var message = [];
 document.EmerGen = document.EmerGen || {};

@@ -53,7 +53,6 @@ window.onload = (function (win, doc) {
 	var data0 = document.EmerGen.data0;
 
 	function setup () {
-		//console.clear ();
 
 		doc.EmerGen = doc.EmerGen || {};
 		var tmp = {
@@ -102,6 +101,12 @@ window.onload = (function (win, doc) {
 		doc.EmerGen.eventTime = eventTime;
 		doc.EmerGen.hintTalk  = hintTalk;
 		doc.EmerGen.eventTalk = eventTalk;
+		doc.EmerGen.fileSave  = fileSave;
+
+		doc.EmerGen.saveTextAsFile = saveTextAsFile;
+		doc.EmerGen.loadFileAsText = loadFileAsText;
+
+		//window.addEventListener ("btn-save", fileSave);
 	}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -170,6 +175,57 @@ window.onload = (function (win, doc) {
 		}
 
 		throw '';
+	}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#######   ###   #       #######  #####     #    #     # #######
+#          #    #       #       #     #   # #   #     # #
+#          #    #       #       #        #   #  #     # #
+#####      #    #       #####    #####  #     # #     # #####
+#          #    #       #             # #######  #   #  #
+#          #    #       #       #     # #     #   # #   #
+#         ###   ####### #######  #####  #     #    #    #######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	function fileSave () {
+		var text = doc.getElementById ("source");
+		var filename = doc.getElementById ("input-fileName");
+		var blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+		console.log ("Saving file", filename);
+		saveAs (blob, filename);
+	}
+
+
+	function saveTextAsFile() {
+		var textToSave = document.getElementById("inputTextToSave").value;
+		var textToSaveAsBlob = new Blob([textToSave], {type:"text/plain"});
+		var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+		var fileNameToSaveAs = document.getElementById("inputFileNameToSaveAs").value;
+
+		var downloadLink = document.createElement("a");
+		downloadLink.download = fileNameToSaveAs;
+		downloadLink.innerHTML = "Download File";
+		downloadLink.href = textToSaveAsURL;
+		downloadLink.onclick = destroyClickedElement;
+		downloadLink.style.display = "none";
+		document.body.appendChild(downloadLink);
+
+		downloadLink.click();
+	}
+ 
+	function destroyClickedElement(event) {
+		document.body.removeChild(event.target);
+	}
+ 
+	function loadFileAsText() {
+		var fileToLoad = document.getElementById("fileToLoad").files[0];
+
+		var fileReader = new FileReader();
+		fileReader.onload = function(fileLoadedEvent) 
+		{
+			var textFromFileLoaded = fileLoadedEvent.target.result;
+			document.getElementById("inputTextToSave").value = textFromFileLoaded;
+		};
+		fileReader.readAsText(fileToLoad, "UTF-8");
 	}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
