@@ -323,6 +323,19 @@ $[-1,+1]      "At absolute upper left corner"
 		></script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#######                          #####                     #
+#        #    #  ######  #####  #     #  ######  #    #   ##
+#        ##  ##  #       #    # #        #       ##   #  # #
+#####    # ## #  #####   #    # #  ####  #####   # #  #    #
+#        #    #  #       #####  #     #  #       #  # #    #
+#        #    #  #       #   #  #     #  #       #   ##    #
+#######  #    #  ######  #    #  #####   ######  #    #  #####
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<!-- Primitives needed to load LISP and other useful predefinitions. -->
+<script type="text/javascript" src="general.js"></script>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    ##   #         ###    #####  ######    ##
   #     #          #    #     # #     #     #
  #      #          #    #       #     #      #
@@ -335,22 +348,14 @@ $[-1,+1]      "At absolute upper left corner"
 <script type="text/javascript" src="jth.js"></script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#######                          #####
-#        #    #  ######  #####  #     #  ######  #    #
-#        ##  ##  #       #    # #        #       ##   #
-#####    # ## #  #####   #    # #  ####  #####   # #  #
-#        #    #  #       #####  #     #  #       #  # #
-#        #    #  #       #   #  #     #  #       #   ##
-#######  #    #  ######  #    #  #####   ######  #    #
+######                                                  #        #####  ######
+#     #  #####   ######  #       #    #  #####   ###### #       #     # #     #
+#     #  #    #  #       #       #    #  #    #  #      #       #       #     #
+######   #    #  #####   #       #    #  #    #  #####  #        #####  ######
+#        #####   #       #       #    #  #    #  #      #             # #
+#        #   #   #       #       #    #  #    #  #      #       #     # #
+#        #    #  ######  ######   ####   #####   ###### #######  #####  #
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-
-		<script type="text/javascript" src="general.js"></script>
-		<script type="text/javascript" src="index.js"></script>
-		<script type="text/javascript" src="hint.js"></script>
-		<script type="text/javascript" src="language.js"></script>
-		<script type="text/javascript" src="content/Template.js"></script>
-		<script type="text/javascript" src="content/Contents.js"></script>
-		<script type="text/javascript" src="main.js"></script>
 
 <script type="text/javascript">
 Javathcript.evalMulti (HEREDOC (function (){/*
@@ -440,11 +445,18 @@ Javathcript.evalMulti (HEREDOC (function (){/*
 */}));
 </script>
 
-<!-- <script id='testLisp' type="text/lisp">
-</script> -->
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#         ###    #####  ######          ######  ####### #######  #####
+#          #    #     # #     #         #     # #       #       #     #
+#          #    #       #     #         #     # #       #       #
+#          #     #####  ######          #     # #####   #####    #####
+#          #          # #               #     # #       #             #
+#          #    #     # #               #     # #       #       #     #
+#######   ###    #####  #               ######  ####### #        #####
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
-		<script type="text/javascript">
-			Javathcript.evalMulti (HEREDOC (function (){/*
+<script type="text/javascript">
+Javathcript.evalMulti (HEREDOC (function (){/*
 (def E (get (js "Math") "E"))
 (def console (js "console"))
 (def log (method console "log"))
@@ -461,7 +473,24 @@ Javathcript.evalMulti (HEREDOC (function (){/*
 (def console (js "console"))
 (def log (method console "log"))
 */}));
-		</script>
+</script>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#######                          #####                   #####
+#        #    #  ######  #####  #     #  ######  #    # #     #
+#        ##  ##  #       #    # #        #       ##   #       #
+#####    # ## #  #####   #    # #  ####  #####   # #  #  #####
+#        #    #  #       #####  #     #  #       #  # # #
+#        #    #  #       #   #  #     #  #       #   ## #
+#######  #    #  ######  #    #  #####   ######  #    # #######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+		<script type="text/javascript" src="index.js"></script>
+		<script type="text/javascript" src="hint.js"></script>
+		<script type="text/javascript" src="language.js"></script>
+		<script type="text/javascript" src="content/Template.js"></script>
+		<script type="text/javascript" src="content/Contents.js"></script>
+		<script type="text/javascript" src="main.js"></script>
 
 	</body>
 </html>
