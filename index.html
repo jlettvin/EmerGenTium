@@ -302,6 +302,7 @@ $[-1,+1]      "At absolute upper left corner"
 			Jonathan D. Lettvin, All Rights Reserved.
 			</abbr>
 		</div>
+	</body>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ####### #     # ######  ####### #######
@@ -313,27 +314,14 @@ $[-1,+1]      "At absolute upper left corner"
    #    #     # #     # ####### #######
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
-		<script
-			type="text/javascript"
-			src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.min.js"
-		></script>
-		<script
-			type="text/javascript"
-			src="https://threejs.org/examples/js/controls/OrbitControls.js"
-		></script>
-
-<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#######                          #####                     #
-#        #    #  ######  #####  #     #  ######  #    #   ##
-#        ##  ##  #       #    # #        #       ##   #  # #
-#####    # ## #  #####   #    # #  ####  #####   # #  #    #
-#        #    #  #       #####  #     #  #       #  # #    #
-#        #    #  #       #   #  #     #  #       #   ##    #
-#######  #    #  ######  #    #  #####   ######  #    #  #####
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-
-<!-- Primitives needed to load LISP and other useful predefinitions. -->
-<script type="text/javascript" src="general.js"></script>
+	<script
+		type="text/javascript"
+		src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.min.js"
+	></script>
+	<script
+		type="text/javascript"
+		src="https://threejs.org/examples/js/controls/OrbitControls.js"
+	></script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    ##   #         ###    #####  ######    ##
@@ -345,7 +333,7 @@ $[-1,+1]      "At absolute upper left corner"
    ##   #######   ###    #####  #         ##
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
-<script type="text/javascript" src="jth.js"></script>
+	<script type="text/javascript" src="jth.js"></script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ######                                                  #        #####  ######
@@ -357,7 +345,7 @@ $[-1,+1]      "At absolute upper left corner"
 #        #    #  ######  ######   ####   #####   ###### #######  #####  #
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
-<script type="text/lisp">
+	<script type="text/lisp">
 ; This text used to be the contents of a file called prelude.lsp.
 ; It is part of the Javathcript suite.
 ; This file contains aliases and common definitions.
@@ -441,7 +429,7 @@ $[-1,+1]      "At absolute upper left corner"
 		(import-math (lambda (funcname)
 							 (def-dyn funcname (method math funcname)))) )
 	(map import-math '(sin cos tan asin acos atan floor max min log abs ceil pow exp atan2 random sqrt round))	)
-</script>
+	</script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #         ###    #####  ######          ######  ####### #######  #####
@@ -453,7 +441,7 @@ $[-1,+1]      "At absolute upper left corner"
 #######   ###    #####  #               ######  ####### #        #####
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
-<script type="text/lisp">
+	<script type="text/lisp">
 (def E (get (js "Math") "E"))
 (def console (js "console"))
 (def log (method console "log"))
@@ -469,24 +457,25 @@ $[-1,+1]      "At absolute upper left corner"
 (log cube)
 (def console (js "console"))
 (def log (method console "log"))
-</script>
+	</script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#######                          #####                   #####
-#        #    #  ######  #####  #     #  ######  #    # #     #
-#        ##  ##  #       #    # #        #       ##   #       #
-#####    # ## #  #####   #    # #  ####  #####   # #  #  #####
-#        #    #  #       #####  #     #  #       #  # # #
-#        #    #  #       #   #  #     #  #       #   ## #
-#######  #    #  ######  #    #  #####   ######  #    # #######
+#######                          #####
+#        #    #  ######  #####  #     #  ######  #    #
+#        ##  ##  #       #    # #        #       ##   #
+#####    # ## #  #####   #    # #  ####  #####   # #  #
+#        #    #  #       #####  #     #  #       #  # #
+#        #    #  #       #   #  #     #  #       #   ##
+#######  #    #  ######  #    #  #####   ######  #    #
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
-		<script type="text/javascript" src="index.js"></script>
-		<script type="text/javascript" src="hint.js"></script>
-		<script type="text/javascript" src="language.js"></script>
-		<script type="text/javascript" src="content/Template.js"></script>
-		<script type="text/javascript" src="content/Contents.js"></script>
-		<script type="text/javascript" src="main.js"></script>
+	<!-- Primitives needed to load LISP and other useful predefinitions. -->
+	<script type="text/javascript" src="general.js"></script>
+	<script type="text/javascript" src="index.js"></script>
+	<script type="text/javascript" src="hint.js"></script>
+	<script type="text/javascript" src="language.js"></script>
+	<script type="text/javascript" src="content/Template.js"></script>
+	<script type="text/javascript" src="content/Contents.js"></script>
+	<script type="text/javascript" src="main.js"></script>
 
-	</body>
 </html>
