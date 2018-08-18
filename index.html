@@ -228,28 +228,50 @@ $[-1,+1]      "At absolute upper left corner"
 			</textarea>
 			</abbr>
 
-			<!--
-<table>
-    <tr><td>Text to Save:</td></tr>
-    <tr>
-        <td colspan="3">
-            <textarea id="inputTextToSave" cols="80" rows="25"></textarea>
-        </td>
-    </tr>
-    <tr>
-        <td>Filename to Save As:</td>
-        <td><input id="inputFileNameToSaveAs"></input></td>
-        <td><button onclick="document.Emergen.saveTextAsFile()">Save Text to File</button></td>
-    </tr>
-    <tr>
-        <td>Select a File to Load:</td>
-        <td><input type="file" id="fileToLoad"></td>
-        <td><button onclick="document.Emergen.loadFileAsText()">Load Selected File</button><td>
-    </tr>
-</table>
-			  -->
+		<!-- file reader -->
+		<script>
+			function openSource (event) {
+				var input = event.target;
 
+				var reader = new FileReader ();
+				reader.onload = function (){
+					var text = reader.result;
+					var output = document.getElementById ('source');
+					output.innerHTML = text;
+				};
+				var blob = input.files[0];
+				console.log ("BLOB", blob.name);
+				reader.readAsText (blob);
+				setSaveName (blob.name);
+			};
 
+			var setSaveName = function (file_name) {
+				var a = document.getElementById('save');
+				if (file_name) a.setAttribute('download', file_name);
+			}
+			//TODO set the contents just before save
+			var setSaveText = function () {
+				var a = document.getElementById ('save');
+				var contents = document.getElementById ('source').innerHTML;
+				//TODO why is this not filling properly?
+				console.log (contents);
+				var mime_type = 'data:text/plain';
+				// text/html, image/png, etc
+				mime_type = mime_type || 'application/octet-stream';
+				a.href = 'data:'+ mime_type +';base64,'+ btoa(contents || '');
+			};
+		</script>
+		<div style="background-color: white;">
+			Load
+			<input
+				type='file'
+				accept='text/*' onchange='openSource(event)'>
+			<a
+				id="save"
+				download="earth.txt"
+				onmouseenter="setSaveText();"
+				href="data:text/plain,mostly harmless&#10;">Save</a>
+		</div>
 		</form>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -336,13 +358,13 @@ $[-1,+1]      "At absolute upper left corner"
 	<script type="text/javascript" src="jth.js"></script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-######                                                  #        #####  ######
-#     #  #####   ######  #       #    #  #####   ###### #       #     # #     #
-#     #  #    #  #       #       #    #  #    #  #      #       #       #     #
-######   #    #  #####   #       #    #  #    #  #####  #        #####  ######
-#        #####   #       #       #    #  #    #  #      #             # #
-#        #   #   #       #       #    #  #    #  #      #       #     # #
-#        #    #  ######  ######   ####   #####   ###### #######  #####  #
+   ##   ######  ######  ####### #       #     # ######  #######   ##
+  #     #     # #     # #       #       #     # #     # #           #
+ #      #     # #     # #       #       #     # #     # #            #
+ #      ######  ######  #####   #       #     # #     # #####        #
+ #      #       #   #   #       #       #     # #     # #            #
+  #     #       #    #  #       #       #     # #     # #           #
+   ##   #       #     # ####### #######  #####  ######  #######   ##
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
 	<script type="text/lisp">
@@ -373,7 +395,9 @@ $[-1,+1]      "At absolute upper left corner"
 (defun minusp (x) (< x 0))
 (defun evenp (x) (equal (rem x 2) 0))
 (defun oddp (x) (/= (rem x 2) 1))
-(defun list-member (E L) (cond ((null L) Nil) ((equal E (first L))  't) ('t (list-member E (rest L)))))
+(defun list-member (E L)
+	(cond ((null L) Nil)
+		((equal E (first L))  't) ('t (list-member E (rest L)))))
 (defun map (F L) (if (null L) Nil (cons (F (head L)) (map F (tail L)))))
 
 ; CADDRs
@@ -427,36 +451,10 @@ $[-1,+1]      "At absolute upper left corner"
 (let*
 	(	(math (js "Math"))
 		(import-math (lambda (funcname)
-							 (def-dyn funcname (method math funcname)))) )
-	(map import-math '(sin cos tan asin acos atan floor max min log abs ceil pow exp atan2 random sqrt round))	)
-	</script>
-
-<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#         ###    #####  ######          ######  ####### #######  #####
-#          #    #     # #     #         #     # #       #       #     #
-#          #    #       #     #         #     # #       #       #
-#          #     #####  ######          #     # #####   #####    #####
-#          #          # #               #     # #       #             #
-#          #    #     # #               #     # #       #       #     #
-#######   ###    #####  #               ######  ####### #        #####
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-
-	<script type="text/lisp">
-(def E (get (js "Math") "E"))
-(def console (js "console"))
-(def log (method console "log"))
-(def EmerGen (js "document.EmerGen"))
-(def data0 (js "document.EmerGen.data0"))
-(def cube (quote (
- ((0 0 0) (0 0 0) (0 0 0))
- ((0 0 0) (0 0 0) (0 0 0))
- ((0 0 0) (0 0 0) (0 0 0))
-)))
-
-(log 'hellisp)
-(log cube)
-(def console (js "console"))
-(def log (method console "log"))
+							 (def-dyn funcname (method math funcname)))))
+	(map import-math '(
+		sin cos tan asin acos atan floor max min
+		log abs ceil pow exp atan2 random sqrt round)))
 	</script>
 
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -477,5 +475,33 @@ $[-1,+1]      "At absolute upper left corner"
 	<script type="text/javascript" src="content/Template.js"></script>
 	<script type="text/javascript" src="content/Contents.js"></script>
 	<script type="text/javascript" src="main.js"></script>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   ##   #######                          #####                    ##
+  #     #        #    #  ######  #####  #     #  ######  #    #     #
+ #      #        ##  ##  #       #    # #        #       ##   #      #
+ #      #####    # ## #  #####   #    # #  ####  #####   # #  #      #
+ #      #        #    #  #       #####  #     #  #       #  # #      #
+  #     #        #    #  #       #   #  #     #  #       #   ##     #
+   ##   #######  #    #  ######  #    #  #####   ######  #    #   ##
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<script type="text/lisp">
+(def E (get (js "Math") "E"))
+(def console (js "console"))
+(def log (method console "log"))
+(def EmerGen (js "document.EmerGen"))
+(def data0 (js "document.EmerGen.data0"))
+(def cube (quote (
+ ((0 0 0) (0 0 0) (0 0 0))
+ ((0 0 0) (0 0 0) (0 0 0))
+ ((0 0 0) (0 0 0) (0 0 0))
+)))
+
+(log 'hellisp)
+(log cube)
+(def console (js "console"))
+(def log (method console "log"))
+	</script>
 
 </html>

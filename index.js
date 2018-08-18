@@ -176,6 +176,29 @@ window.onload = (function (win, doc) {
 
 		throw '';
 	}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#######   ###   #       ####### #       #######    #    ######
+#          #    #       #       #       #     #   # #   #     #
+#          #    #       #       #       #     #  #   #  #     #
+#####      #    #       #####   #       #     # #     # #     #
+#          #    #       #       #       #     # ####### #     #
+#          #    #       #       #       #     # #     # #     #
+#         ###   ####### ####### ####### ####### #     # ######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+	function fileLoad (filename) {
+		var reader = new FileReader ();
+		reader.onload = function (e) {
+			var text = reader.result;
+			console.log (text);
+		}
+		reader.onerror = function (e) {
+			console.log ("File couldn't be read");
+		}
+		reader.readAsText (filename, "UTF-8");
+	}
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #######   ###   #       #######  #####     #    #     # #######
 #          #    #       #       #     #   # #   #     # #
@@ -628,6 +651,7 @@ window.onload = (function (win, doc) {
 		//introspect (run);
 		//introspect (show);
 		//introspect (manifold);
+		//fileLoad ("/home/jlettvin/Downloads/foo.txt");
 	};
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
