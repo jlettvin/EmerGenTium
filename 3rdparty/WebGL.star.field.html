@@ -64,13 +64,13 @@ class Star {
 
 		this.draw = function()
 		{
-			var star_size = 8 - (-this.z / 2);
+			var star_size = 4 * (4 - (-this.z / 2));
 			var star_color = (MAX_DEPTH + this.z) / (MAX_DEPTH*2);
 
 			window.gfx.globalAlpha = star_color;
 			window.gfx.fillStyle = 'white';
 			window.gfx.fillRect(this.x2d, this.y2d, star_size, star_size);
-			window.gfx.globalAlpha = 1;
+			window.gfx.globalAlpha = 0.3;
 		}
 
 		// Reset (initialize) on object construction
