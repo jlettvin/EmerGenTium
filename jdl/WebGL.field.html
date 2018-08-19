@@ -36,7 +36,7 @@ window.onload = (function (win, doc) {
 				this.c = 1;
 				this.x = i;
 				this.y = j;
-				this.z = -this.c * MAX_DEPTH + k;
+				this.z = -this.c * MAX_DEPTH - k;
 				this.r = Math.random ();
 				this.g = Math.random ();
 				this.b = Math.random ();
@@ -54,10 +54,6 @@ window.onload = (function (win, doc) {
 					this.g = Math.random ();
 					this.b = Math.random ();
 				}
-				//if (move) { // Trigonometry to rotate star around Z axis
-					//this.x = x = x * Math.cos (angle) - y * Math.sin (angle);
-					//this.y = y = y * Math.cos (angle) + x * Math.sin (angle);
-				//}
 
 				// Calculate "Camera View". Project 3D star coordinates to 2D screen
 				this.x2d = ScreenW * ScreenR * x / this.z + (ScreenW / 2);
@@ -66,8 +62,6 @@ window.onload = (function (win, doc) {
 				this.x2d = ScreenW * x / this.z + (ScreenW / 2);
 				this.y2d = ScreenH * y / this.z + (ScreenH / 2);
 
-				// if (move) { this.z += 0.0025; } // Move star toward the camera
-
 				// Reset this star if it goes outside of the viewing area
 				if (this.x2d <= 0 || this.x2d >= ScreenW ||
 					this.y2d <= 0 || this.y2d >= ScreenH)
@@ -75,15 +69,18 @@ window.onload = (function (win, doc) {
 				return this;
 			}
 
-			this.draw = function () {
-				var star_sizeX = this.scaleX * (4 + (this.z / 2));
-				var star_sizeY = this.scaleY * (4 + (this.z / 2));
+			this.rgb = function () {
 				var star_alpha = (this.c * MAX_DEPTH + this.z) / (this.c * MAX_DEPTH*2);
-
 				var r = this.r * 255, g = this.g * 255, b = this.b * 255;
 				var a = star_alpha * 255;
-				//window.gfx.fillStyle = sprintfjs.sprintf ("rgb(%f,%f,%f,%f)", r,g,b,a);
 				window.gfx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
+			}
+
+			this.draw = function () {
+				var star_sizeX = this.scaleX * (MAX_DEPTH + (this.z / 2));
+				var star_sizeY = this.scaleY * (MAX_DEPTH + (this.z / 2));
+
+				this.rgb ();
 				window.gfx.fillRect (this.x2d, this.y2d, star_sizeX, star_sizeY);
 				return this;
 			}
