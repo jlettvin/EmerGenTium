@@ -1,0 +1,126 @@
+<!--
+//-->
+<html>
+    <head>
+        <title>Field Demo</title>
+    </head>
+    <body>
+		<table><tr>
+			<td><h1>Field</h1></td>
+			<td><button id = "button">START/PAUSE</button></td>
+		</tr></table>
+		<canvas id = "canvas" width = "501" height = "501"></canvas><br />
+<script type="text/javascript" src="../sprintf.js"></script>
+<script type="text/javascript">
+window.onload = (function (win, doc) {
+	var move    = false;
+	var canvas  = document.getElementById ("canvas");
+	var context = window.gfx = canvas.getContext ('2d');
+	var button  = document.getElementById ("button");
+	var ScreenW = canvas.width;
+	var ScreenH = canvas.height;
+	var ScreenR = (ScreenH/ScreenW);
+
+	var MS_DELAY  = 30;
+	var MAX_DEPTH = 20;
+	var RX = 5, RY = 5, RZ = 5;
+
+	button.addEventListener ("click", function (event) { move = !move; });
+	window.gfx.globalAlpha = 0.3;
+
+	class Star {
+
+		constructor (i, j, k) {
+
+			this.reset = function (i, j, k) {
+				this.c = 1;
+				this.x = i;
+				this.y = j;
+				this.z = -this.c * MAX_DEPTH + k;
+				this.r = Math.random ();
+				this.g = Math.random ();
+				this.b = Math.random ();
+				this.x2d = 0;
+				this.y2d = 0;
+				this.angle = 0.001;
+				this.scaleX = 2;
+				this.scaleY = 2;
+			}
+
+			this.project = function () {
+				var angle = this.angle, x = this.x, y = this.y;
+				if (move) {
+					this.r = Math.random ();
+					this.g = Math.random ();
+					this.b = Math.random ();
+				}
+				//if (move) { // Trigonometry to rotate star around Z axis
+					//this.x = x = x * Math.cos (angle) - y * Math.sin (angle);
+					//this.y = y = y * Math.cos (angle) + x * Math.sin (angle);
+				//}
+
+				// Calculate "Camera View". Project 3D star coordinates to 2D screen
+				this.x2d = ScreenW * ScreenR * x / this.z + (ScreenW / 2);
+				this.y2d = ScreenH           * y / this.z + (ScreenH / 2);
+
+				this.x2d = ScreenW * x / this.z + (ScreenW / 2);
+				this.y2d = ScreenH * y / this.z + (ScreenH / 2);
+
+				// if (move) { this.z += 0.0025; } // Move star toward the camera
+
+				// Reset this star if it goes outside of the viewing area
+				if (this.x2d <= 0 || this.x2d >= ScreenW ||
+					this.y2d <= 0 || this.y2d >= ScreenH)
+					this.reset ();
+				return this;
+			}
+
+			this.draw = function () {
+				var star_sizeX = this.scaleX * (4 + (this.z / 2));
+				var star_sizeY = this.scaleY * (4 + (this.z / 2));
+				var star_alpha = (this.c * MAX_DEPTH + this.z) / (this.c * MAX_DEPTH*2);
+
+				var r = this.r * 255, g = this.g * 255, b = this.b * 255;
+				var a = star_alpha * 255;
+				//window.gfx.fillStyle = sprintfjs.sprintf ("rgb(%f,%f,%f,%f)", r,g,b,a);
+				window.gfx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
+				window.gfx.fillRect (this.x2d, this.y2d, star_sizeX, star_sizeY);
+				return this;
+			}
+
+			// Reset (initialize) on object construction
+			this.reset (i, j, k);
+		}
+	}
+
+	// Initialize stars
+	var N = (2*RZ+1) * (2*RY+1) * (2*RX+1);
+	var stars = new Array (N);
+	for (var n = 0, k = -RZ; k <= +RZ; ++k) {
+		for (var j = -RY; j <= +RY; ++j) {
+			for (var i = -RX; i <= +RX; ++i, ++n) {
+				stars[n] = new Star (i, j, k);
+			}
+		}
+	}
+
+	// Main animation loop
+	setInterval (function  () {
+
+		// Clear screen
+		gfx.beginPath ();
+		gfx.fillStyle = 'rgb(127,127,127,127)';
+		gfx.rect (0, 0, ScreenW, ScreenH);
+		gfx.fill ();
+
+		// Move and draw stars
+		gfx.beginPath ();
+		for (star of stars) { star.project ().draw (); }
+		gfx.fill ();
+
+	}, MS_DELAY);
+}) (window, document);
+
+        </script>
+	</body>
+</html>

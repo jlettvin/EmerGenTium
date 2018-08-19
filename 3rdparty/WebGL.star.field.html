@@ -11,122 +11,104 @@
 
     Thanks :-)
 
-	view-source:http://www.tigrisgames.com/fx/starfield.php
-
-	Modified by: Jonathan D. Lettvin, 20180818
-
-//-->
-<html>
+//--><html>
     <head>
         <title>Starfield Demo</title>
     </head>
     <body>
-		<table><tr>
-			<td><h1>Star Field</h1></td>
-			<td><button id = "button">START/PAUSE</button></td>
-		</tr></table>
-		<canvas id = "canvas" width = "501" height = "501"></canvas><br />
-<script type="text/javascript" src="../sprintf.js"></script>
-<script type="text/javascript">
-window.onload = (function (win, doc) {
-	var move    = false;
-	var canvas  = document.getElementById ("canvas");
-	var context = window.gfx = canvas.getContext ('2d');
-	var button  = document.getElementById ("button");
-	var ScreenW = canvas.width;
-	var ScreenH = canvas.height;
-	var ScreenR = (ScreenH/ScreenW);
+        <canvas id = "canvas" width = "800" height = "500"></canvas>
+        <script>
 
-	var MS_DELAY  = 30;
-	var MAX_DEPTH = 10;
-	var STARS_MAX = 1000;
+            var ScreenWidth = 800;
+            var ScreenHeight = 500;
 
-	button.addEventListener ("click", function (event) { move = !move; });
-	window.gfx.globalAlpha = 0.3;
+            var MAX_DEPTH = 10;
 
-	class Star {
+            class Star {
 
-		constructor () {
+                constructor() {
 
-			this.reset = function ()
-			{
-				this.x = 1 - Math.random () * 2.0;
-				this.y = 1 - Math.random () * 2.0;
-				this.z = Math.random () * -MAX_DEPTH;
-				this.r = Math.random ();
-				this.g = Math.random ();
-				this.b = Math.random ();
-				this.x2d = 0;
-				this.y2d = 0;
-				this.angle = 0.001;
-				this.scaleX = 5;
-				this.scaleY = 5;
-			}
+                    this.reset = function()
+                    {
+                        this.x = 1 - Math.random() * 2.0;
+                        this.y = 1 - Math.random() * 2.0;
+                        this.z = Math.random() * -MAX_DEPTH;
+                        this.x2d = 0;
+                        this.y2d = 0;
+                        this.angle = 0.001;
+                    }
 
-			this.project = function ()
-			{
-				var angle = this.angle, x = this.x, y = this.y;
-				if (move) { // Trigonometry to rotate star around Z axis
-					this.x = x = x * Math.cos (angle) - y * Math.sin (angle);
-					this.y = y = y * Math.cos (angle) + x * Math.sin (angle);
-				}
+                    this.project = function()
+                    {
+                        // Rotate this star around the Z axis using trigonometry (sine & cosine)
+                        this.x = this.x * Math.cos(this.angle) - this.y * Math.sin(this.angle);
+                        this.y = this.y * Math.cos(this.angle) + this.x * Math.sin(this.angle);
+                    
+						// Calculate "Camera View" -- Project the 3D star coordinates to the 2D screen
+                        this.x2d = (ScreenHeight/ScreenWidth) * ScreenWidth * this.x / this.z + (ScreenWidth / 2);
+                        this.y2d = ScreenHeight * this.y / this.z + (ScreenHeight / 2);
+                        
+//                        this.x2d = ScreenWidth * this.x / this.z + (ScreenWidth / 2);
+                        this.y2d = ScreenHeight * this.y / this.z + (ScreenHeight / 2);
+                         
+                    	// Move star toward the camera
+                        this.z += 0.0025;
 
-				// Calculate "Camera View". Project 3D star coordinates to 2D screen
-				this.x2d = ScreenW * ScreenR * x / this.z + (ScreenW / 2);
-				this.y2d = ScreenH           * y / this.z + (ScreenH / 2);
+                        // Reset this star if it goes outside of the viewing area
+                        if (this.x2d <= 0 || this.x2d >= ScreenWidth ||
+                            this.y2d <= 0 || this.y2d >= ScreenHeight)
+                            this.reset();
+                    }
 
-				this.x2d = ScreenW * x / this.z + (ScreenW / 2);
-				this.y2d = ScreenH * y / this.z + (ScreenH / 2);
+                    this.draw = function()
+                    {
+                        var star_size = 3 - (-this.z / 2);
+                        var star_color = (MAX_DEPTH + this.z) / (MAX_DEPTH*2);
 
-				if (move) { this.z += 0.0025; } // Move star toward the camera
+                        window.gfx.globalAlpha = star_color;
+                        window.gfx.fillStyle = 'white';
+                        window.gfx.fillRect(this.x2d, this.y2d, star_size, star_size);
+                        window.gfx.globalAlpha = 1;
+                    }
 
-				// Reset this star if it goes outside of the viewing area
-				if (this.x2d <= 0 || this.x2d >= ScreenW ||
-					this.y2d <= 0 || this.y2d >= ScreenH)
-					this.reset ();
-				return this;
-			}
+                    // Reset (initialize) on object construction
+                    this.reset();
+                }
+            }
+            
+            // Initialize stars
 
-			this.draw = function ()
-			{
-				var star_sizeX = this.scaleX * (4 + (this.z / 2));
-				var star_sizeY = this.scaleY * (4 + (this.z / 2));
-				var star_alpha = (MAX_DEPTH + this.z) / (MAX_DEPTH*2);
+            var STARS_MAX = 2000;
 
-				var r = this.r * 255, g = this.g * 255, b = this.b * 255;
-				var a = star_alpha * 255;
-				//window.gfx.fillStyle = sprintfjs.sprintf ("rgb(%f,%f,%f,%f)", r,g,b,a);
-				window.gfx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
-				window.gfx.fillRect (this.x2d, this.y2d, star_sizeX, star_sizeY);
-				return this;
-			}
+            var stars = new Array(STARS_MAX);
 
-			// Reset (initialize) on object construction
-			this.reset ();
-		}
-	}
+            for (let i = 0; i < STARS_MAX; i++)
+                stars[i] = new Star();
 
-	// Initialize stars
-	var stars = new Array (STARS_MAX);
-	for (let i = 0; i < STARS_MAX; i++) stars[i] = new Star ();
+			// Create and initialize canvas
+            var canvas = document.getElementById("canvas");
+            var context = window.gfx = canvas.getContext('2d');
 
-	// Main animation loop
-	setInterval (function  () {
+            // Main animation loop
+            setInterval(function() {
 
-		// Clear screen
-		gfx.beginPath ();
-		gfx.fillStyle = 'rgb(127,127,127,127)';
-		gfx.rect (0, 0, ScreenW, ScreenH);
-		gfx.fill ();
+                // Clear screen
+                gfx.beginPath();
+                    gfx.fillStyle = 'black';
+                    gfx.rect(0, 0, 800, 500);
+                gfx.fill();
 
-		// Move and draw stars
-		gfx.beginPath ();
-		for (star of stars) { star.project ().draw (); }
-		gfx.fill ();
+				// Move and draw stars
+                gfx.beginPath();
+                    gfx.fillStyle = 'white';
+                    for (let i = 0; i < STARS_MAX; i++) {
+                        stars[i].project();
+                        stars[i].draw();
+                    }
+                gfx.fill();
 
-	}, MS_DELAY);
-}) (window, document);
-
+            }, 0);
+            
         </script>
-	</body>
+    </body>
 </html>
