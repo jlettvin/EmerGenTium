@@ -22,8 +22,9 @@ window.onload = (function (win, doc) {
 	var ScreenR = (ScreenH/ScreenW);
 
 	var MS_DELAY  = 30;
-	var MAX_DEPTH = 160;
-	var RX = 50, RY = 50, RZ = 5;
+	var MAX_DEPTH = 70;
+	var RR = 15;
+	var RX = RR, RY = RR, RZ = RR;
 
 	button.addEventListener ("click", function (event) { move = !move; });
 	window.gfx.globalAlpha = 0.3;
@@ -43,8 +44,8 @@ window.onload = (function (win, doc) {
 				this.x2d = 0;
 				this.y2d = 0;
 				this.angle = 0.001;
-				this.scaleX = 0.05;
-				this.scaleY = 0.05;
+				this.scaleX = 0.1;
+				this.scaleY = 0.1;
 			}
 
 			this.project = function () {
