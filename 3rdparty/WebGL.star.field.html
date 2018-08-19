@@ -26,7 +26,8 @@
 			<td><button id = "button">START/PAUSE</button></td>
 		</tr></table>
 		<canvas id = "canvas" width = "501" height = "501"></canvas><br />
-<script>
+<script type="text/javascript" src="../sprintf.js"></script>
+<script type="text/javascript">
 window.onload = (function (win, doc) {
 	var move    = false;
 	var canvas  = document.getElementById ("canvas");
@@ -36,10 +37,12 @@ window.onload = (function (win, doc) {
 	var ScreenH = canvas.height;
 	var ScreenR = (ScreenH/ScreenW);
 
+	var MS_DELAY  = 30;
 	var MAX_DEPTH = 10;
 	var STARS_MAX = 1000;
 
 	button.addEventListener ("click", function (event) { move = !move; });
+	window.gfx.globalAlpha = 0.3;
 
 	class Star {
 
@@ -50,11 +53,14 @@ window.onload = (function (win, doc) {
 				this.x = 1 - Math.random () * 2.0;
 				this.y = 1 - Math.random () * 2.0;
 				this.z = Math.random () * -MAX_DEPTH;
+				this.r = Math.random ();
+				this.g = Math.random ();
+				this.b = Math.random ();
 				this.x2d = 0;
 				this.y2d = 0;
 				this.angle = 0.001;
-				this.scaleX = 3;
-				this.scaleY = 3;
+				this.scaleX = 5;
+				this.scaleY = 5;
 			}
 
 			this.project = function ()
@@ -85,12 +91,13 @@ window.onload = (function (win, doc) {
 			{
 				var star_sizeX = this.scaleX * (4 + (this.z / 2));
 				var star_sizeY = this.scaleY * (4 + (this.z / 2));
-				var star_color = (MAX_DEPTH + this.z) / (MAX_DEPTH*2);
+				var star_alpha = (MAX_DEPTH + this.z) / (MAX_DEPTH*2);
 
-				window.gfx.globalAlpha = star_color;
-				window.gfx.fillStyle = 'white';
+				var r = this.r * 255, g = this.g * 255, b = this.b * 255;
+				var a = star_alpha * 255;
+				//window.gfx.fillStyle = sprintfjs.sprintf ("rgb(%f,%f,%f,%f)", r,g,b,a);
+				window.gfx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
 				window.gfx.fillRect (this.x2d, this.y2d, star_sizeX, star_sizeY);
-				window.gfx.globalAlpha = 0.3;
 				return this;
 			}
 
@@ -108,7 +115,7 @@ window.onload = (function (win, doc) {
 
 		// Clear screen
 		gfx.beginPath ();
-		gfx.fillStyle = 'gray';
+		gfx.fillStyle = 'rgb(127,127,127,127)';
 		gfx.rect (0, 0, ScreenW, ScreenH);
 		gfx.fill ();
 
@@ -117,7 +124,7 @@ window.onload = (function (win, doc) {
 		for (star of stars) { star.project ().draw (); }
 		gfx.fill ();
 
-	}, 0);
+	}, MS_DELAY);
 }) (window, document);
 
         </script>
