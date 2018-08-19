@@ -13,17 +13,22 @@
 
 	view-source:http://www.tigrisgames.com/fx/starfield.php
 
+	Modified by: Jonathan D. Lettvin, 20180818
+
 //-->
 <html>
     <head>
         <title>Starfield Demo</title>
     </head>
     <body>
-		<h1>Star Field</h1>
+		<table><tr>
+			<td><h1>Star Field</h1></td>
+			<td><button id = "button">START/PAUSE</button></td>
+		</tr></table>
 		<canvas id = "canvas" width = "501" height = "501"></canvas><br />
-		<button id = "button">START/PAUSE</button>
 <script>
 window.onload = (function (win, doc) {
+	var move    = false;
 	var canvas  = document.getElementById ("canvas");
 	var context = window.gfx = canvas.getContext ('2d');
 	var button  = document.getElementById ("button");
@@ -32,11 +37,9 @@ window.onload = (function (win, doc) {
 	var ScreenR = (ScreenH/ScreenW);
 
 	var MAX_DEPTH = 10;
-	var move = false;
+	var STARS_MAX = 1000;
 
-	button.addEventListener ("click", function (event) {
-		move = !move;
-	});
+	button.addEventListener ("click", function (event) { move = !move; });
 
 	class Star {
 
@@ -50,27 +53,26 @@ window.onload = (function (win, doc) {
 				this.x2d = 0;
 				this.y2d = 0;
 				this.angle = 0.001;
+				this.scaleX = 3;
+				this.scaleY = 3;
 			}
 
 			this.project = function ()
 			{
-				if (move) {
-					// Rotate this star around Z axis using trigonometry (sine & cosine)
-					this.x = this.x * Math.cos (this.angle) - this.y * Math.sin (this.angle);
-					this.y = this.y * Math.cos (this.angle) + this.x * Math.sin (this.angle);
+				var angle = this.angle, x = this.x, y = this.y;
+				if (move) { // Trigonometry to rotate star around Z axis
+					this.x = x = x * Math.cos (angle) - y * Math.sin (angle);
+					this.y = y = y * Math.cos (angle) + x * Math.sin (angle);
 				}
 
 				// Calculate "Camera View". Project 3D star coordinates to 2D screen
-				this.x2d = ScreenW * ScreenR * this.x / this.z + (ScreenW / 2);
-				this.y2d = ScreenH           * this.y / this.z + (ScreenH / 2);
+				this.x2d = ScreenW * ScreenR * x / this.z + (ScreenW / 2);
+				this.y2d = ScreenH           * y / this.z + (ScreenH / 2);
 
-				// this.x2d = ScreenW * this.x / this.z + (ScreenW / 2);
-				this.y2d = ScreenH * this.y / this.z + (ScreenH / 2);
+				this.x2d = ScreenW * x / this.z + (ScreenW / 2);
+				this.y2d = ScreenH * y / this.z + (ScreenH / 2);
 
-				if (move) {
-					// Move star toward the camera
-					this.z += 0.0025;
-				}
+				if (move) { this.z += 0.0025; } // Move star toward the camera
 
 				// Reset this star if it goes outside of the viewing area
 				if (this.x2d <= 0 || this.x2d >= ScreenW ||
@@ -81,12 +83,13 @@ window.onload = (function (win, doc) {
 
 			this.draw = function ()
 			{
-				var star_size = 4 * (4 - (-this.z / 2));
+				var star_sizeX = this.scaleX * (4 + (this.z / 2));
+				var star_sizeY = this.scaleY * (4 + (this.z / 2));
 				var star_color = (MAX_DEPTH + this.z) / (MAX_DEPTH*2);
 
 				window.gfx.globalAlpha = star_color;
 				window.gfx.fillStyle = 'white';
-				window.gfx.fillRect (this.x2d, this.y2d, star_size, star_size);
+				window.gfx.fillRect (this.x2d, this.y2d, star_sizeX, star_sizeY);
 				window.gfx.globalAlpha = 0.3;
 				return this;
 			}
@@ -97,11 +100,7 @@ window.onload = (function (win, doc) {
 	}
 
 	// Initialize stars
-
-	var STARS_MAX = 1000;
-
 	var stars = new Array (STARS_MAX);
-
 	for (let i = 0; i < STARS_MAX; i++) stars[i] = new Star ();
 
 	// Main animation loop
@@ -109,7 +108,7 @@ window.onload = (function (win, doc) {
 
 		// Clear screen
 		gfx.beginPath ();
-		gfx.fillStyle = 'black';
+		gfx.fillStyle = 'gray';
 		gfx.rect (0, 0, ScreenW, ScreenH);
 		gfx.fill ();
 
