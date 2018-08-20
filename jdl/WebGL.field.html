@@ -63,18 +63,19 @@ window.onload = (function (win, doc) {
 	 */
 
 	const The = {};
-	//  D R  point count
-	//  1 0       1
-	//  3 1      27
-	//  5 2     125
-	//  7 3     729
-	//  9 4    4913 best
-	// 11 5   35937 most
-	// 13 6  274625 slow
-	// 15 7 2136689 fail
+	//   D   R   point count
+	//   1   0       1
+	//   3   1      27
+	//   9   4     125
+	//  17   8     729 good
+	//  33  16    4913 best
+	//  65  32   35937 most
+	// 129  64  274625 slow
+	// 257 128 2136689 fail
 
 	// Initialize radius, depth, scale, and points
 	// Autogenerate aesthetically pleasing proportions between cube and nodes.
+	console.log ("The");
 	for (var i=0; i<8; ++i) {
 		The[i]        = {};
 		The[i].radius = i ? 2**(i-1) : 0;
@@ -99,6 +100,8 @@ window.onload = (function (win, doc) {
 
 	const Znorm = 2 * RR;
 	const Zview = 2 * Znorm;
+
+	console.log ("radius", The[chosen].radius, "points", The[chosen].points);
 
 	/*
 	####### #     # ####### #     # #######
