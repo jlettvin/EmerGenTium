@@ -119,3 +119,27 @@ function verbose () {
 	}
 };
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+######  #######  #####  #     #   ###   ######  #######
+#     # #       #     # #     #    #    #     # #
+#     # #       #     # #     #    #    #     # #
+######  #####   #     # #     #    #    ######  #####
+#   #   #       #   # # #     #    #    #   #   #
+#    #  #       #    #  #     #    #    #    #  #
+#     # #######  #### #  #####    ###   #     # #######
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+function require(module,path,file) {
+	const s = "'", d = '"';
+	const sd = s+d, ds = d+s, sp = " ", oa='<', ca='>';
+	const baseURL = '';
+	const type = 'text/javascript';
+	//const path = '../';
+	const script = oa+'script id='+ds+module+sd+sp+
+		"type="+d+type+d+sp+
+		"src="+d+baseURL+path+file+d+ca+
+		oa+"/script"+ca
+	document.write (script);
+	console.log ("require", script);
+}
+

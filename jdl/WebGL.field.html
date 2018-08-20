@@ -10,113 +10,275 @@
 			<td><button id = "button">START/PAUSE</button></td>
 		</tr></table>
 		<canvas id = "canvas" width = "501" height = "501"></canvas><br />
-<script type="text/javascript" src="../sprintf.js"></script>
+		<script type="text/javascript" src="../general.js"></script>
 <script type="text/javascript">
+
+/* *****************************************************************************
+######  #######  #####  #     #   ###   ######  #######
+#     # #       #     # #     #    #    #     # #
+#     # #       #     # #     #    #    #     # #
+######  #####   #     # #     #    #    ######  #####
+#   #   #       #   # # #     #    #    #   #   #
+#    #  #       #    #  #     #    #    #    #  #
+#     # #######  #### #  #####    ###   #     # #######
+***************************************************************************** */
+require ('gl-matrix', '../', 'gl-matrix.js');
+require ('sprintf', '../', 'sprintf.js');
+
 window.onload = (function (win, doc) {
+	/*
+	#     #    #    ######
+	#     #   # #   #     #
+	#     #  #   #  #     #
+	#     # #     # ######
+ 	 #   #  ####### #   #
+  	  # #   #     # #    #
+   	   #    #     # #     #
+	 */
 	var move    = false;
 	var canvas  = document.getElementById ("canvas");
 	var context = window.gfx = canvas.getContext ('2d');
 	var button  = document.getElementById ("button");
-	var ScreenW = canvas.width;
-	var ScreenH = canvas.height;
-	var ScreenR = (ScreenH/ScreenW);
 
-	var MS_DELAY  = 30;
-	var MAX_DEPTH = 70;
-	var RR = 15;
-	var RX = RR, RY = RR, RZ = RR;
+	window.gfx.globalAlpha = 1.0;
 
+	/*
+	var gl = canvas.getContext('webgl')
+	if( gl == null ) {
+		gl = canvas.getContext('experimental-webgl')
+		if( gl == null ) {
+			throw "Could not get webgl context"
+		}
+	}
+	*/
+
+	/*
+	 #####  ####### #     #  #####  #######
+	#     # #     # ##    # #     #    #
+	#       #     # # #   # #          #
+	#       #     # #  #  #  #####     #
+	#       #     # #   # #       #    #
+	#     # #     # #    ## #     #    #
+	 #####  ####### #     #  #####     #
+	 */
+
+	const The = {};
+	//  D R  point count
+	//  1 0       1
+	//  3 1      27
+	//  5 2     125
+	//  7 3     729
+	//  9 4    4913 best
+	// 11 5   35937 most
+	// 13 6  274625 slow
+	// 15 7 2136689 fail
+
+	// Initialize radius, depth, scale, and points
+	// Autogenerate aesthetically pleasing proportions between cube and nodes.
+	for (var i=0; i<8; ++i) {
+		The[i]        = {};
+		The[i].radius = i ? 2**(i-1) : 0;
+		The[i].depth  = 2**(i+1);
+		The[i].scale  = 4**(7-i);
+		The[i].points = (1 + The[i].radius * 2)**3;
+	}
+
+	const chosen    = 5;
+	const CanvasW   = canvas.width;
+	const CanvasH   = canvas.height;
+	const CanvasR   = (CanvasH/CanvasW);
+	const W0        = CanvasW / 2;
+	const H0        = CanvasH / 2;
+	const MS_DELAY  = 30;
+	const MAX_DEPTH = The[chosen].depth;
+	const SCALE     = The[chosen].scale * 0.00625 / 3;
+	const RR        = The[chosen].radius;
+
+	const RX = RR, RY = RR, RZ = RR;
+	const R2 = RZ / 2;
+
+	const Znorm = 2 * RR;
+	const Zview = 2 * Znorm;
+
+	/*
+	####### #     # ####### #     # #######
+	#       #     # #       ##    #    #
+	#       #     # #       # #   #    #
+	#####   #     # #####   #  #  #    #
+	#        #   #  #       #   # #    #
+	#         # #   #       #    ##    #
+	#######    #    ####### #     #    #
+ 	*/
 	button.addEventListener ("click", function (event) { move = !move; });
-	window.gfx.globalAlpha = 0.3;
 
-	class Star {
+	/*
+	#     # ####### ######  #######
+	##    # #     # #     # #
+	# #   # #     # #     # #
+	#  #  # #     # #     # #####
+	#   # # #     # #     # #
+	#    ## #     # #     # #
+	#     # ####### ######  #######
+ 	*/
+	class Node {
 
 		constructor (i, j, k) {
 
-			this.reset = function (i, j, k) {
-				this.c = 1;
-				this.x = i;
-				this.y = j;
-				this.z = -this.c * MAX_DEPTH - k;
-				this.r = Math.random ();
-				this.g = Math.random ();
-				this.b = Math.random ();
-				this.x2d = 0;
-				this.y2d = 0;
-				this.angle = 0.001;
-				this.scaleX = 0.1;
-				this.scaleY = 0.1;
+			/*
+			 #####  ####### #       ####### ######
+			#     # #     # #       #     # #     #
+			#       #     # #       #     # #     #
+			#       #     # #       #     # ######
+			#       #     # #       #     # #   #
+			#     # #     # #       #     # #    #
+			 #####  ####### ####### ####### #     #
+			 */
+			this.color = function () {
+				const z = this.xyz.z + RZ;
+				const alpha = 1; //(MAX_DEPTH + this.xyz.z) / (MAX_DEPTH*2);
+				const a = alpha * 255;
+				var _ = this.rgb = { r:0, g:0, b:0 };
+				for (var c in this.rgb) this.rgb[c] = Math.random () * 255;
+				//this.fill = 'rgba(' + _.r + ',' + _.g + ',' + _.b + ',' + a + ')';
+				this.fill = 'rgb(' + _.r + ',' + _.g + ',' + _.b + ')';
 			}
+
+			/*
+			######  #######  #####  ####### #######
+			#     # #       #     # #          #
+			#     # #       #       #          #
+			######  #####    #####  #####      #
+			#   #   #             # #          #
+			#    #  #       #     # #          #
+			#     # #######  #####  #######    #
+			 */
+			this.reset2 = function (i, j, k) {
+				const z2    = this.xyz.z / 2;
+				const scale = 5e-1 * (Zview - this.xyz.z) / Zview;
+				const edge  = SCALE * (MAX_DEPTH + z2);
+				this.camera = { x:i * scale, y:j * scale };
+				this.edge   = { x:edge, y:edge };
+				this.xyz    = { x:i, y:j, z:k };
+				this.color ();
+			}
+
+			this.reset1 = function (i, j, k) {
+				this.xyz    = { x:i, y:j, z:k+RR };
+				const z2    = this.xyz.z / 2;
+				const invZ  = 5e-1 / (-this.xyz.z + 4 * RR);
+				const dx    = SCALE * (MAX_DEPTH + z2);
+				const dy    = SCALE * (MAX_DEPTH + z2);
+				const dx2   = dx / 2;
+				const dy2   = dy / 2;
+				const cx    = W0 + CanvasW * this.xyz.x * invZ - dx2;
+				const cy    = H0 + CanvasH * this.xyz.y * invZ - dy2;
+				this.camera = { x:cx, y:cy, z:0, i:0, j:0, k:0 };
+				this.edge   = { x:dx, y:dy, z:SCALE};
+				this.color ();
+			}
+
+			/*
+			######  ######  #######       # #######  #####  #######
+			#     # #     # #     #       # #       #     #    #
+			#     # #     # #     #       # #       #          #
+			######  ######  #     #       # #####   #          #
+			#       #   #   #     # #     # #       #          #
+			#       #    #  #     # #     # #       #     #    #
+			#       #     # #######  #####  #######  #####     #
+			 */
 
 			this.project = function () {
-				var angle = this.angle, x = this.x, y = this.y;
-				if (move) {
-					this.r = Math.random ();
-					this.g = Math.random ();
-					this.b = Math.random ();
-				}
-
-				// Calculate "Camera View". Project 3D star coordinates to 2D screen
-				this.x2d = ScreenW * ScreenR * x / this.z + (ScreenW / 2);
-				this.y2d = ScreenH           * y / this.z + (ScreenH / 2);
-
-				this.x2d = ScreenW * x / this.z + (ScreenW / 2);
-				this.y2d = ScreenH * y / this.z + (ScreenH / 2);
-
-				// Reset this star if it goes outside of the viewing area
-				if (this.x2d <= 0 || this.x2d >= ScreenW ||
-					this.y2d <= 0 || this.y2d >= ScreenH)
-					this.reset ();
+				if (move) this.color ();
 				return this;
 			}
 
-			this.rgb = function () {
-				var star_alpha = (this.c * MAX_DEPTH + this.z) / (this.c * MAX_DEPTH*2);
-				var r = this.r * 255, g = this.g * 255, b = this.b * 255;
-				var a = star_alpha * 255;
-				window.gfx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
-			}
-
+			/*
+			######  ####### #     # ######  ####### ######
+			#     # #       ##    # #     # #       #     #
+			#     # #       # #   # #     # #       #     #
+			######  #####   #  #  # #     # #####   ######
+			#   #   #       #   # # #     # #       #   #
+			#    #  #       #    ## #     # #       #    #
+			#     # ####### #     # ######  ####### #     #
+			 */
 			this.draw = function () {
-				var star_sizeX = this.scaleX * (MAX_DEPTH + (this.z / 2));
-				var star_sizeY = this.scaleY * (MAX_DEPTH + (this.z / 2));
-
-				this.rgb ();
-				window.gfx.fillRect (this.x2d, this.y2d, star_sizeX, star_sizeY);
+				var ctx = window.gfx;
+				//gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+				ctx.fillStyle = this.fill;
+				ctx.fillRect (
+					this.camera.x, this.camera.y,
+					this.  edge.x, this.  edge.y);
 				return this;
 			}
 
-			// Reset (initialize) on object construction
-			this.reset (i, j, k);
+			this.reset1 (i, j, k);  // Reset (initialize) on object construction
 		}
 	}
 
-	// Initialize stars
-	var N = (2*RZ+1) * (2*RY+1) * (2*RX+1);
-	var stars = new Array (N);
-	for (var n = 0, k = -RZ; k <= +RZ; ++k) {
-		for (var j = -RY; j <= +RY; ++j) {
-			for (var i = -RX; i <= +RX; ++i, ++n) {
-				stars[n] = new Star (i, j, k);
+	/*
+	 #####  #     # ######  #######
+	#     # #     # #     # #
+	#       #     # #     # #
+	#       #     # ######  #####
+	#       #     # #     # #
+	#     # #     # #     # #
+	 #####   #####  ######  #######
+	 */
+
+	// Initialize nodes
+	var cube = [];
+	for (var n = 0, k = -RZ; k <= +RZ; ++k) { cube.push ([]);  // new face
+		var face = cube[cube.length-1];
+		for (var j = -RY; j <= +RY; ++j) { face.push ([]);  // new line
+			var line = face[face.length-1];
+			for (var i = -RX; i <= +RX; ++i, ++n) {  // new node
+				line.push (new Node (i, j, k));
 			}
 		}
 	}
 
+	// Clear screen
+	var clear = function () {
+		if (true) {
+			gfx.clearRect (0, 0, CanvasW, CanvasH);
+		} else {
+			gfx.globalAlpha = 1.0;
+			gfx.beginPath ();
+			gfx.fillStyle = 0x7f7f7f;
+			gfx.rect (0, 0, CanvasW, CanvasH);
+			gfx.fill ();
+		}
+	}
+
+	clear ();
+
+	/*
+	   #    #     #   ###   #     #    #    ####### #######
+	  # #   ##    #    #    ##   ##   # #      #    #
+	 #   #  # #   #    #    # # # #  #   #     #    #
+	#     # #  #  #    #    #  #  # #     #    #    #####
+	####### #   # #    #    #     # #######    #    #
+	#     # #    ##    #    #     # #     #    #    #
+	#     # #     #   ###   #     # #     #    #    #######
+	 */
 	// Main animation loop
 	setInterval (function  () {
 
 		// Clear screen
-		gfx.beginPath ();
-		gfx.fillStyle = 'rgb(127,127,127,127)';
-		gfx.rect (0, 0, ScreenW, ScreenH);
-		gfx.fill ();
+		clear ();
 
-		// Move and draw stars
+		// Move and draw nodes
 		gfx.beginPath ();
-		for (star of stars) { star.project ().draw (); }
-		gfx.fill ();
+		for (var face of cube) {
+			for (var line of face) {
+				for (var node of line) {
+					node.project ().draw ();
+				}
+			}
+		}
+		//gfx.fill ();
 
-	}, MS_DELAY);
+	}, move ? MS_DELAY : 100);
 }) (window, document);
 
         </script>
