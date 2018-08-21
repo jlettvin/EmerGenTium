@@ -9,7 +9,9 @@
 			<td><h1>Field</h1></td>
 			<td><button id = "button">START/PAUSE</button></td>
 		</tr></table>
-		<canvas id = "canvas" width = "501" height = "501"></canvas><br />
+		<canvas id = "canvas" width = "501" height = "501">
+Your browser does not support Canvases.
+		</canvas><br />
 		<script type="text/javascript" src="../general.js"></script>
 <script type="text/javascript">
 
@@ -22,8 +24,6 @@
 #    #  #       #    #  #     #    #    #    #  #
 #     # #######  #### #  #####    ###   #     # #######
 ***************************************************************************** */
-require ('gl-matrix', '../', 'gl-matrix.js');
-require ('sprintf', '../', 'sprintf.js');
 
 window.onload = (function (win, doc) {
 	/*
@@ -37,7 +37,7 @@ window.onload = (function (win, doc) {
 	 */
 	var move    = false;
 	var canvas  = document.getElementById ("canvas");
-	var context = window.gfx = canvas.getContext ('2d');
+	var context = window.gfx = canvas.getContext ('web-gl');
 	var button  = document.getElementById ("button");
 
 	window.gfx.globalAlpha = 1.0;
