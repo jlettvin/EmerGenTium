@@ -1,11 +1,74 @@
+/* The CSS for the document
+
+The CSS file linked from "index.html". The actual link in is "indexstart.html".
+
+All overriding of what markup looks like is done here. None is in the HTML.
+
+<span class="needfix"> is used to show something that really needs work by showing it in red.
+
+The segs following are for optional comments that can be left
+out of the document. The idea is to have text left in the
+final document that we don't want to display or print. Use it
+if you want.
+
+<seg class="doncomment"> is for Don's comments.
+<seg class="jdlcomment"> is for Jonathon's comments.
+
+The file "show.cmd" merges the files into one called "index.html". This is a get-around until I can figure out a better way. I have not written a comparable script to do the same in linux. The other html files are pieces which can be edited separately reducing possible conflicts. But if any new HTML files are to be added the names have to be added to "show.cmd" and its equivalent in linux.
+
+Need to build a CSS for printing. Maybe later.
+
+I could have sworn that there was a way to make up my own tag names. Must have been dreaming.
+
+Want to create two buttons and put at the top. One for printing
+and the other to supress the comments. It should also hide the
+two buttons.
+
+*/
+
 h1 {
-	text-align : center;
+	text-align      : center;
 }
 
 h2 {
-	text-align : center;
+	text-align      : left;
 }
 
-iframe {
-	style="border : none; height : 100%; width  : 100%";
+div {
+	max-width       : 8in;
+	font-size       : 16pt;
+	margin          : .5in .5in .5in .5in;
+	text-align      : justify;
+    text-justify    : inter-word;
+}
+
+div.doncomment {
+	color           : blue;
+}
+
+div.jdlcomment {
+	color           : green;
+}
+
+dl {
+    font-weight     : bold;
+}
+
+dd {
+    font-weight     : normal;
+	text-indent     : -20px;
+}
+/* Would rather use hanging indent, but can't find it. */
+
+ul {
+	text-align      : left;
+}
+
+p.b {
+	font-weight     : bold;
+	padding-bottom  : 1%;
+}
+
+span.needfix {
+	color           : red;
 }
