@@ -32,7 +32,12 @@ body{background-color: #808080}
 
 	doc.jlettvin = doc.jlettvin || {};
 	doc.jlettvin.scrimmage = doc.jlettvin.scrimmage || {
-		create: function create(Rx=10, Ry=10, Rz=3) {
+		create: function create(arg) {
+
+			var Rx, Ry, Rz;
+
+			if (arg.length == undefined) { Rx = arg.x; Ry = arg.y; Rz = arg.z; }
+			else                      { Rx = arg[0]; Ry = arg[1]; Rz = arg[2]; }
 
 			the = { // Data structure local to this instance
 				winW    : win.innerWidth,
@@ -42,6 +47,7 @@ body{background-color: #808080}
 				edge    : 0.25,            // Should be range/2 to maintain gap
 				margin  : 0.9,             // Fit visualization to window
 				lattice : [],              // linear array of node objects
+				carrier : [],
 			};
 
 			// Radial axial node count of nodes beyond ctr
@@ -122,7 +128,8 @@ body{background-color: #808080}
 				var z = the.shrink * k;
 				var planeP   = (k == -2);
 				var planeN   = (k == -1);
-				var scale = (planeP || planeN) ? 1.0 : 0.5;
+				var active   = (planeN || planeP);
+				var scale = active ? 1.0 : 0.5;
 				var size = scale * the.shrink * the.edge;
 				var material = (planeP || planeN) ?
 					{transparent: true, opacity: 0.75} :
@@ -130,17 +137,20 @@ body{background-color: #808080}
 				for(var j = -the.RY; j <= the.RY; ++j) {
 					var y = the.shrink * j;
 					for(var i = -the.RX; i <= the.RX; ++i) {
+						// TODO Move initialization out to client.
 						//sizes.push(size);
 						var x = the.shrink * i;
-						var grayness = planeP ? 0.0 :
+						var grayness = planeP ?
+							0.0 :
 							(planeN ? 1.0 :  Math.random() * 0.5 + 0.25);
-						var nodeMaterial = new THREE.MeshLambertMaterial(material);
-						var node         = new THREE.Mesh(the.bufGeom, nodeMaterial);
-						nodeMaterial.color.setRGB(grayness, grayness, grayness);
+						var nodeMat = new THREE.MeshLambertMaterial(material);
+						var node    = new THREE.Mesh(the.bufGeom, nodeMat);
+						nodeMat.color.setRGB(grayness, grayness, grayness);
 						node.position.set(x*the.range, y*the.range, z*the.range);
 						//node.grayness = grayness; // *** NOTE THIS
 						the.nodeObject.add(node);
 						the.lattice.push(node);
+						if (active) the.carrier.push(i);
 					}
 				}
 			}
@@ -175,8 +185,13 @@ body{background-color: #808080}
 			// Change the node color/opacity
 			the.irgba    =   function(rgba) {
 				// Returns the previous values
+				if (rgba.i === "undefined") {
+					console.log("irgba: MISSING INDEX!");
+					return [0,0,0,0];
+				}
 				var i        = rgba.i;
 				var update   = false;
+				var colors   = false;
 				var node     = the.lattice[i];
 				var material = node.material;
 				var color    = material.color;
@@ -185,10 +200,10 @@ body{background-color: #808080}
 
 				for (var key in rgba) {
 					switch(key) {
-						case 'r': color.r = rgba.r; break;
-						case 'g': color.g = rgba.g; break;
-						case 'b': color.b = rgba.b; break;
-						case 'a': material.opacity = rgba.a; break;
+						case 'r': color.r = rgba.r; colors = true; break;
+						case 'g': color.g = rgba.g; colors = true; break;
+						case 'b': color.b = rgba.b; colors = true; break;
+						case 'a': material.opacity = rgba.a; colors = true; break;
 						case 'update': update = true; break;
 						default: break;
 					};
@@ -282,7 +297,10 @@ body{background-color: #808080}
 	}
 })(document,window);
 
-	var scrimmage1 = document.jlettvin.scrimmage.create(10, 10, 3);
+	function initialize(scrimmage) {
+	}
+
+	var scrimmage1 = document.jlettvin.scrimmage.create({x:10, y:10, z:3});
 	scrimmage1.unitTest();
 	var iAnother = scrimmage1.xyz2i([0,0,1]);
 	scrimmage1.irgba({i: iAnother, r:0, g:1, b:0, a:1, update: true});
