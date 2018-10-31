@@ -31,139 +31,132 @@ body{background-color: #808080}
 	// isize doesn't work, but perhaps we can do this all with opacity.
 
 	doc.jlettvin = doc.jlettvin || {};
-	doc.jlettvin.scrimmage = doc.jlettvin.scrimmage || {};
+	doc.jlettvin.scrimmage = doc.jlettvin.scrimmage || {
+		create: function create(Rx=10, Ry=10, Rz=3) {
 
-	var winW          = win.innerWidth;
-	var winH          = win.innerHeight;
+			the = { // Data structure local to this instance
+				winW    : win.innerWidth,
+				winH    : win.innerHeight,
+				Acamera : 6.5,             // Orthogonal camera position distances
+				range   : 0.5,             // Scalars help nodes fit within window
+				edge    : 0.25,            // Should be range/2 to maintain gap
+				margin  : 0.9,             // Fit visualization to window
+				lattice : [],              // linear array of node objects
+			};
 
-	// Orthogonal distances to original camera position
-	var Acamera       = 6.5;
+			// Radial axial node count of nodes beyond ctr
+			the.RX = Rx;
+			the.RY = Ry;
+			the.RZ = Rz;
+			// Counts of nodes along each axis (including 1 extra for center)
+			the.DX = 1 + 2 * the.RX;
+			the.DY = 1 + 2 * the.RY;
+			the.DZ = 1 + 2 * the.RZ;
+			// Count of lattice vertices
+			the.N  = the.DX * the.DY * the.DZ;
+			// Use largest of radii to scale nodes to fit within window and axes
+			the.shrink  = 1.0 / Math.max(the.RX, Math.max(the.RY, the.RZ));
+			the.size    = the.shrink * the.edge;
 
-	function create(Rx=10, Ry=10, Rz=3) {
-		// Scalars to guarantee fitting nodes within window
-		var range         = 5e-1;
-		var edge          = range / 2;
+			//var sizes         = []; // node cube size array
+			the.axis          = [   // ndarray-style summable axes
+				new Int32Array(the.DX),
+				new Int32Array(the.DY),
+				new Int32Array(the.DZ),
+			];
 
-		// Radial count of nodes along each axis beyond center
-		var RX            = Rx;
-		var RY            = Ry;
-		var RZ            = Rz;  // Never less than 2 while PlaneP/PlaneN testing
-		// Counts of nodes along each axis (including 1 extra for center)
-		var DX            = 1 + 2 * RX;
-		var DY            = 1 + 2 * RY;
-		var DZ            = 1 + 2 * RZ;
-		// Count of lattice vertices
-		var N             = DX * DY * DZ;
-		// Use largest of radii to scale nodes to fit within window and axes
-		var shrinkToFit   = 1 / Math.max(RX, Math.max(RY, RZ));
-		var size          = shrinkToFit * edge;
+			// Now instance global THREE resources
+			the.scene         = new THREE.Scene();
+			the.camera        = new THREE.PerspectiveCamera(10, the.winW / the.winH, 1, 1000);
+			the.renderer      = new THREE.WebGLRenderer({alpha: true, antialias: true});
+			the.controls      = new THREE.TrackballControls(the.camera);
+			the.ambientLight  = new THREE.AmbientLight('#EEEEEE');
+			the.axisHelper    = new THREE.AxesHelper(1.25);
+			the.nodeObject    = new THREE.Object3D();
+			the.bufGeom       = new THREE.BufferGeometry();
+			the.allGeom       = new THREE.CubeGeometry(the.size, the.size, the.size);
 
-		var lattice       = []; // linear array of node objects
-		doc.jlettvin.scrimmage.lattice = lattice;
-		//var sizes         = []; // node cube size array
-		var axis          = [   // ndarray-style summable axes
-			new Int32Array(DX),
-			new Int32Array(DY),
-			new Int32Array(DZ),
-		];
-		var i, j, k;            // loop indices
+			the.camera.position.set(the.Acamera, the.Acamera, the.Acamera);
+			the.camera.lookAt(the.scene.position);
 
-		// Now instance global THREE resources
-		var scene         = new THREE.Scene();
-		var camera        = new THREE.PerspectiveCamera(10, winW / winH, 1, 1000);
-		var renderer      = new THREE.WebGLRenderer({alpha: true, antialias: true});
-		var controls      = new THREE.TrackballControls(camera);
-		var ambientLight  = new THREE.AmbientLight('#EEEEEE');
-		var axisHelper    = new THREE.AxesHelper(1.25);
-		var nodeObject    = new THREE.Object3D();
-		var bufGeom       = new THREE.BufferGeometry();
-		var allGeom       = new THREE.CubeGeometry(size, size, size);
+			// Fit doc element into window without scrollbars
+			the.renderer.setSize(the.margin * the.winW, the.margin * the.winH);
+			the.renderer.setPixelRatio(win.devicePixelRatio);
 
-		camera.position.set(Acamera, Acamera, Acamera);
-		camera.lookAt(scene.position);
+			// How the trackball controls work
+			Object.assign(the.controls,{
+				rotateSpeed          : 5.0,
+				zoomSpeed            : 3.2,
+				panSpeed             : 0.8,
+				noZoom               : false,
+				noPan                : true,
+				staticMoving         : false,
+				dynamicDampingFactor : 0.2,
+			});
 
-		// Fit doc element into window without scrollbars
-		renderer.setSize(0.95 * winW, 0.95 * winH);
-		renderer.setPixelRatio(win.devicePixelRatio);
+			// When to update
+			the.controls.addEventListener('change', renderLattice);
 
-		// How the trackball controls work
-		Object.assign(controls,{
-			rotateSpeed          : 5.0,
-			zoomSpeed            : 3.2,
-			panSpeed             : 0.8,
-			noZoom               : false,
-			noPan                : true,
-			staticMoving         : false,
-			dynamicDampingFactor : 0.2,
-		});
+			// window resize
+			win.addEventListener('resize', function () {
+				the.winW          = win.innerWidth;
+				the.winH          = win.innerHeight;
+				the.camera.aspect = the.winW / the.winH;
 
-		// When to update
-		controls.addEventListener('change', renderLattice);
+				the.camera.updateProjectionMatrix();
+				the.renderer.setSize(the.winW*the.shrink, the.winH*the.shrink);
+				the.controls.handleResize();
+				renderLattice();
+			}, false);
 
-		// window resize
-		win.addEventListener('resize', function () {
-			winW          = win.innerWidth;
-			winH          = win.innerHeight;
-			camera.aspect = winW / winH;
-
-			camera.updateProjectionMatrix();
-			renderer.setSize(winW*shrinkToFit, winH*shrinkToFit);
-			controls.handleResize();
-			renderLattice();
-		}, false);
-
-		// Generate axes for conversion from (x,y,z) to global index
-		for(k = 0; k <= DZ; ++k) { axis[2][k] = k * DY * DX; }
-		for(j = 0; j <= DY; ++j) { axis[1][j] = j *      DX; }
-		for(i = 0; i <= DX; ++i) { axis[0][i] = i          ; }
+			// Generate axes for conversion from (x,y,z) to global index
+			var axis = the.axis;
+			for(var k = 0; k <= the.DZ; ++k) { axis[2][k] = k * the.DY * the.DX; }
+			for(var j = 0; j <= the.DY; ++j) { axis[1][j] = j          * the.DX; }
+			for(var i = 0; i <= the.DX; ++i) { axis[0][i] = i                  ; }
 
 
-		// Construct lattice and indexable lattice list
-		bufGeom.fromGeometry(allGeom);
-		for(k = -RZ; k <= RZ; ++k) {
-			var z = shrinkToFit * k;
-			var planeP   = (k == -2);
-			var planeN   = (k == -1);
-			var scale = (planeP || planeN) ? 1.0 : 0.5;
-			var size = shrinkToFit * scale * edge;
-			var material = (planeP || planeN) ?
-				{transparent: true, opacity: 0.75} :
-				{transparent: true, opacity: 0.25} ;
-			for(j = -RY; j <= RY; ++j) {
-				var y = shrinkToFit * j;
-				for(i = -RX; i <= RX; ++i) {
-					//sizes.push(size);
-					var x = shrinkToFit * i;
-					var grayness = planeP ? 0.0 :
-						(planeN ? 1.0 :  Math.random() * 0.5 + 0.25);
-					var nodeMaterial = new THREE.MeshLambertMaterial(material);
-					var node         = new THREE.Mesh(bufGeom, nodeMaterial);
-					nodeMaterial.color.setRGB(grayness, grayness, grayness);
-					node.position.set(x*range, y*range, z*range);
-					//node.grayness = grayness; // *** NOTE THIS
-					nodeObject.add(node);
-					lattice.push(node);
+			// Construct lattice and indexable lattice list
+			the.bufGeom.fromGeometry(the.allGeom);
+			for(var k = -the.RZ; k <= the.RZ; ++k) {
+				var z = the.shrink * k;
+				var planeP   = (k == -2);
+				var planeN   = (k == -1);
+				var scale = (planeP || planeN) ? 1.0 : 0.5;
+				var size = scale * the.shrink * the.edge;
+				var material = (planeP || planeN) ?
+					{transparent: true, opacity: 0.75} :
+					{transparent: true, opacity: 0.25} ;
+				for(var j = -the.RY; j <= the.RY; ++j) {
+					var y = the.shrink * j;
+					for(var i = -the.RX; i <= the.RX; ++i) {
+						//sizes.push(size);
+						var x = the.shrink * i;
+						var grayness = planeP ? 0.0 :
+							(planeN ? 1.0 :  Math.random() * 0.5 + 0.25);
+						var nodeMaterial = new THREE.MeshLambertMaterial(material);
+						var node         = new THREE.Mesh(the.bufGeom, nodeMaterial);
+						nodeMaterial.color.setRGB(grayness, grayness, grayness);
+						node.position.set(x*the.range, y*the.range, z*the.range);
+						//node.grayness = grayness; // *** NOTE THIS
+						the.nodeObject.add(node);
+						the.lattice.push(node);
+					}
 				}
 			}
-		}
-		/*
-		// After filling size array, make available as a geometry attribute
-		bufGeom.addAttribute(
-			'size',
-			new THREE.Float32BufferAttribute(sizes, 1).setDynamic(true));
-		 */
+			/*
+			// After filling size array, make available as a geometry attribute
+			bufGeom.addAttribute(
+				'size',
+				new THREE.Float32BufferAttribute(sizes, 1).setDynamic(true));
+			 */
 
-		// Give (x,y,z) of center, and test conversions back and forth to index
-		var theCenter  = [0,0,0];
-		var iCenter = xyz2i(theCenter);
-		var xyzCenter = i2xyz(iCenter);
-		//console.log("XYZ:", theCenter, " == ", xyzCenter);
 
-		// Observe node at (0,0,0) and make access simpler
-		//console.log("NODE(0,0,0):", lattice[iCenter]);
+			// Observe node at (0,0,0) and make access simpler
+			//console.log("NODE(0,0,0):", lattice[iCenter]);
 
-		/*
-			// Change the node size
+			/*
+				// Change the node size
 	function isize(i, want) {
 	// Returns the previous values
 		var node = lattice[i];
@@ -175,69 +168,127 @@ body{background-color: #808080}
 		geom.attributes.size.needsUpdate = true;
 		return old
 	}
-		// Test control of node size
+			// Test control of node size
 	isize(iCenter, 2);  // TODO This doesn't work (see isize)
-		 */
+			 */
 
-		// Change the node color/opacity
-		function irgba(i, rgb, a) {
-			// Returns the previous values
-			var node     = document.jlettvin.scrimmage.lattice[i];
-			var material = node.material;
-			var color    = material.color;
-			var opacity  = material.opacity;
-			var old      = [color.r, color.b, color.b, opacity];
+			// Change the node color/opacity
+			the.irgba    =   function(rgba) {
+				// Returns the previous values
+				var i        = rgba.i;
+				var update   = false;
+				var node     = the.lattice[i];
+				var material = node.material;
+				var color    = material.color;
+				var opacity  = material.opacity;
+				var old      = [color.r, color.b, color.b, opacity];
 
-			//console.log("NODE-(",i,"):",node);
-			Object.assign(color, rgb);
-			material.opacity = a;
-			material.needsUpdate = true;
-			//console.log("NODE+(",i,"):",node);
+				for (var key in rgba) {
+					switch(key) {
+						case 'r': color.r = rgba.r; break;
+						case 'g': color.g = rgba.g; break;
+						case 'b': color.b = rgba.b; break;
+						case 'a': material.opacity = rgba.a; break;
+						case 'update': update = true; break;
+						default: break;
+					};
+				}
 
-			return old;
+				material.needsUpdate = true;
+
+				if (update) {
+					renderLattice();
+					the.controls.update();
+				}
+
+				return old;
+			}
+
+			// Convert coordinates to index
+			the.xyz2i = function(xyz) {
+				//var the = document.jlettvin.scrimmage;
+				var value = 
+					the.axis[0][xyz[0]+the.RX] +
+					the.axis[1][xyz[1]+the.RY] +
+					the.axis[2][xyz[2]+the.RZ];
+				return (value);
+			}
+
+			// Convert index to coordinates
+			the.i2xyz = function(i) { // ~~(foo%bar) gives the integer modulus
+				//var the = document.jlettvin.scrimmage;
+				var x = ~~(i % the.DX) - the.RX; i /= the.DX;
+				var y = ~~(i % the.DY) - the.RY; i /= the.DY;
+				var z = ~~(i     ) - the.RZ;
+				return [x,y,z];
+			}
+
+			function animationLoop() {
+				requestAnimationFrame(animationLoop);
+				the.controls.update();
+			}
+
+			function renderLattice() {
+				the.renderer.render(the.scene, the.camera);
+			}
+
+			// UNIT TESTS UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
+			the.unitTest = function() {
+				console.log("UNIT TESTS");
+
+				// Compare lists
+				var listsEqual = function(a, b) {
+					const ai = a.length, bi = b.length;
+					if (ai != bi) return false;
+					for (var i=ai; i>0; --i) if (a[i] != b[i]) return false;
+					return true;
+				};
+
+				// Implement unit test review
+				var test = function(unit, result, title) {
+					const msg = ["[FAIL]", "[PASS]"];
+					var PF = msg[~~result];
+					console.log(PF, result, "UNIT(", unit, "): ", title);
+				}
+
+				// 11111111111111111111111111111111111111111111111111111111111111
+				var unit1 = function() {
+					var theCenter = [0,0,0];
+					var iCenter   = the.xyz2i(theCenter);
+					var xyzCenter = the.i2xyz(iCenter);
+					test( 1,
+						listsEqual(theCenter, xyzCenter),
+						"index <-> [x,y,z] cvt");
+				}
+
+				var units = [unit1];            // List of tests
+
+				for(var unit of units) unit();  // Execute tests in list
+			}
+			// UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
+
+			the.scene.add(the.ambientLight);
+			the.scene.add(the.axisHelper);
+			the.scene.add(the.nodeObject);
+
+			the.irgba({i: the.xyz2i([0,0,0]), r:1, g:0, b:0, a:1});  // add red cube
+
+			doc.body.appendChild(the.renderer.domElement);
+
+			animationLoop();
+
+			return the;
 		}
-		// Test control of node color
-		irgba(iCenter, {r:1, g:0, b:0}, 1);
-
-
-		// Convert coordinates to index
-		function xyz2i(xyz) {
-			return axis[0][xyz[0]+RX] + axis[1][xyz[1]+RY] + axis[2][xyz[2]+RZ];
-		}
-
-		// Convert index to coordinates
-		function i2xyz(i) { // ~~(foo%bar) gives the integer modulus
-			var x = ~~(i % DX) - RX; i /= DX;
-			var y = ~~(i % DY) - RY; i /= DY;
-			var z = ~~(i     ) - RZ;
-			return [x,y,z];
-		}
-
-		function animationLoop() {
-			requestAnimationFrame(animationLoop);
-			controls.update();
-		}
-
-		function renderLattice() { renderer.render(scene, camera); }
-
-		scene.add(ambientLight);
-		scene.add(axisHelper);
-		scene.add(nodeObject);
-
-		doc.body.appendChild(renderer.domElement);
-
-		animationLoop();
-
-		doc.jlettvin.scrimmage.irgba   =   irgba;
-		doc.jlettvin.scrimmage.xyz2i   =   xyz2i;
-		doc.jlettvin.scrimmage.i2xyz   =   i2xyz;
 	}
-	doc.jlettvin.scrimmage.create = create;
 })(document,window);
 
-	var scrimmage = document.jlettvin.scrimmage;
-	scrimmage.create(10, 10, 5);
-	var iAnother = scrimmage.xyz2i[0,0,1];
-	//scrimmage.irgba(iAnother,{r:0, g:1, b:0},1);
+	var scrimmage1 = document.jlettvin.scrimmage.create(10, 10, 3);
+	scrimmage1.unitTest();
+	var iAnother = scrimmage1.xyz2i([0,0,1]);
+	scrimmage1.irgba({i: iAnother, r:0, g:1, b:0, a:1, update: true});
+
+	// TODO separate shared trackball to control each window independently
+	//var scrimmage2 = document.jlettvin.scrimmage.create(2, 2, 2);
+
 	</script>
 </html>
