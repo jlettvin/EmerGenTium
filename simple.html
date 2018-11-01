@@ -3,6 +3,8 @@
 <html>
 <style>
 body{background-color: #808080}
+table{background-color: white}
+td{text-align: center}
 </style>
 	<head>
 		<script
@@ -13,14 +15,23 @@ body{background-color: #808080}
 		</script>
 	</head>
 	<body>
-		<div align="center" style="background-color:white">
-			<big><big>EmerGenTium&trade;</big></big><br/>
-			<small>
-				Copyright&copy;2018 Jonathan D. Lettvin, All Rights Reserved
-			</small><br/>
-		</div>
-	</body>
-	<script type="text/javascript">
+		<table width="100%">
+			<tr>
+				<td>
+					<big><big>EmerGenTium&trade;</big></big>
+				</td><td id="messages">
+					Messages appear here.
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<small>
+					Copyright&copy;2018 Jonathan D. Lettvin, All Rights Reserved
+					</small>
+				</td>
+			</tr>
+		</table>
+		<script type="text/javascript">
 
 /////////////////////////////////////////
 // Scene Setup
@@ -191,36 +202,23 @@ body{background-color: #808080}
 			for(var j = 0; j <= the.DY; ++j) { axis[1][j] = j          * the.DX; }
 			for(var i = 0; i <= the.DX; ++i) { axis[0][i] = i                  ; }
 
-
 			// Construct lattice and indexable lattice list
 			the.bufGeom.fromGeometry(the.allGeom);
 			for(var k = -the.RZ; k <= the.RZ; ++k) {
 				var z = the.shrink * k;
-				var planeP   = (k == -2);
-				var planeN   = (k == -1);
-				var active   = (planeN || planeP);
-				var scale = active ? 1.0 : 0.5;
-				var size = scale * the.shrink * the.edge;
-				var material = (planeP || planeN) ?
-					{transparent: true, opacity: 0.75} :
-					{transparent: true, opacity: 0.25} ;
+				var size = the.shrink * the.edge;
+				var material = {transparent: true, opacity: 0} ;
 				for(var j = -the.RY; j <= the.RY; ++j) {
 					var y = the.shrink * j;
 					for(var i = -the.RX; i <= the.RX; ++i) {
-						// TODO Move initialization out to client.
 						//sizes.push(size);
 						var x = the.shrink * i;
-						var grayness = planeP ?
-							0.0 :
-							(planeN ? 1.0 :  Math.random() * 0.5 + 0.25);
 						var nodeMat = new THREE.MeshLambertMaterial(material);
 						var node    = new THREE.Mesh(the.bufGeom, nodeMat);
-						nodeMat.color.setRGB(grayness, grayness, grayness);
+						nodeMat.color.setRGB(0, 0, 0);
 						node.position.set(x*the.range, y*the.range, z*the.range);
-						//node.grayness = grayness; // *** NOTE THIS
 						the.nodeObject.add(node);
 						the.lattice.push(node);
-						if (active) the.carrier.push(i);
 					}
 				}
 			}
@@ -313,7 +311,7 @@ body{background-color: #808080}
 	}
 })(document,window);
 
-	function initialize(scrimmage, fun, value, rgba) {
+	function initialize(scrimmage, fun, value, sigma, rgba) {
 		rgba.update = false;
 		for (var i=scrimmage.lattice.length; i-- > 0;) {
 			var node = scrimmage.lattice[i];
@@ -324,65 +322,73 @@ body{background-color: #808080}
 				Math.round(scale * node.position.y),
 				Math.round(scale * node.position.z),
 			];
-			if (fun(xyz, value, scale)) {
+			if (fun(xyz, value, sigma, scale)) {
 				rgba.i = i;
 				scrimmage.irgba(rgba);
 			}
 		}
 	}
 
-	function zplane(xyz, value, scale) {
+	function zplane(xyz, value, sigma, scale) {
 		// TODO figure out why value == 1 is the same as value == 2
 		//console.log("zplane:", xyz);
 		var z = xyz[2];
+		var upper = value + sigma, lower = value - sigma;
 		z = Math.round(z + 0.5 * z / Math.abs(z));
 		//console.log("zplane:", z);
-		return (z == value);
+		return (z <= upper && z >= lower);
 	}
 
-	function zcylinder(xyz, value, scale) {
+	function zcylinder(xyz, value, sigma, scale) {
 		var x = xyz[0];
 		var y = xyz[1];
 		var r = Math.round(Math.sqrt(x**2 + y**2) + 0.5);
-		return (r == value);
+		var upper = value + sigma, lower = value - sigma;
+		return (r <= upper && r >= lower);
 	}
 
-	function sphere(xyz, value, scale) {
+	function sphere(xyz, value, sigma, scale) {
 		var x = xyz[0];
 		var y = xyz[1];
 		var z = xyz[2];
 		var r = Math.round(Math.sqrt(x**2 + y**2 + z**2) + 0.5);
-		return (r == value);
+		var upper = value + sigma, lower = value - sigma;
+		return (r <= upper && r >= lower);
 	}
 
-	function zparaboloid(xyz, value, scale) {
+	function zparaboloid(xyz, value, sigma, scale) {
 		var x = xyz[0];
 		var y = xyz[1];
 		var z = xyz[2];
 		var r = Math.round((x**2 + y**2) / value + 0.5);
-		return (r == z);
+		var upper = z + sigma, lower = z - sigma;
+		return (r <= upper && r >= lower);
 	}
 
-	var scrimmage1 = document.jlettvin.scrimmage.create({x:8, y:8, z:8});
+	var scrimmage1 = document.jlettvin.scrimmage.create({x:7, y:7, z:7});
 	scrimmage1.unitTest();
 	var iAnother = scrimmage1.xyz2i([0,0,1]);
 	scrimmage1.irgba({i: iAnother, r:0, g:1, b:0, a:1, update: true});
 	if (true) {
 		scrimmage1.clear(true);
-		console.log("ZPLANE(0)");
-		initialize(scrimmage1, zplane     , -2, {r:0, g:1, b:0, a:0.5});
-		console.log("ZPLANE(2)");
-		initialize(scrimmage1, zplane     ,  2, {r:0, g:0, b:1, a:0.5});
-		console.log("ZCYLINER(8)");
-		initialize(scrimmage1, zcylinder  ,  8, {r:1, g:1, b:0, a:0.5});
-		console.log("SPHERE(7)");
-		initialize(scrimmage1, sphere     ,  7, {r:1, g:0, b:0, a:0.5});
-		console.log("PARABOLOID(1)");
-		initialize(scrimmage1, zparaboloid, 12, {r:1, g:1, b:1, a:0.5});
+		var sigma = 0.5;
+		var messages = document.getElementById("messages");
+		messages.html = "ZPLANE(-2)";
+		initialize(scrimmage1, zplane     , -2, sigma, {r:0, g:1, b:0, a:0.5});
+		messages.html = "ZPLANE(2)";
+		initialize(scrimmage1, zplane     ,  2, sigma, {r:0, g:0, b:1, a:0.5});
+		messages.html = "ZCYLINDER(8)";
+		initialize(scrimmage1, zcylinder  ,  5, sigma, {r:1, g:1, b:0, a:0.5});
+		messages.html = "SPHERE(7)";
+		initialize(scrimmage1, sphere     ,  6, sigma, {r:1, g:0, b:0, a:0.5});
+		messages.html = "PARABOLOID(12)";
+		initialize(scrimmage1, zparaboloid, 10, sigma, {r:1, g:1, b:1, a:0.5});
+		messages.html = "INITIALIZED";
 	}
 
 	// TODO separate shared trackball to control each window independently
 	//var scrimmage2 = document.jlettvin.scrimmage.create(2, 2, 2);
 
-	</script>
+		</script>
+	</body>
 </html>
