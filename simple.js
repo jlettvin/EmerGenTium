@@ -94,6 +94,8 @@
 				},
 
 				initialize: function(scrimmage, fun, value, sigma, rgba, normal) {
+					// reimplement (merge) into init
+					// reimplement (avoid loops)
 					var flat;
 					switch(normal) {
 						case 0: flat = [1,2]; break;
@@ -101,7 +103,6 @@
 						case 2: flat = [0,1]; break;
 					}
 					rgba.update = false;
-					//console.log("INITIALIZE ", fun, "(", value, ")");
 					for (var i=scrimmage.lattice.length; i-- > 0;) {
 						var node = scrimmage.lattice[i];
 						var scale = 0.5 / scrimmage.size;
@@ -119,7 +120,7 @@
 				},
 
 				init: function(parms) {
-					console.log("INIT:", parms);
+					if (parms.verbose == true) console.log("INIT:", parms);
 					the.initialize(
 						parms.scrimmage,
 						parms.fun,
