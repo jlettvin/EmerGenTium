@@ -1,3 +1,5 @@
+"use strict";
+
 (function(doc,win) {
 	// TODO
 	// isize doesn't work, but perhaps we can do this all with opacity.
@@ -11,7 +13,7 @@
 			if (arg.length == undefined) { Rx = arg.x; Ry = arg.y; Rz = arg.z; }
 			else                      { Rx = arg[0]; Ry = arg[1]; Rz = arg[2]; }
 
-			the = { // Data structure local to this instance
+			var the = { // Data structure local to this instance
 				winW    : win.innerWidth,
 				winH    : win.innerHeight,
 				Acamera : 6.5,         // Orthogonal camera position distances
@@ -90,6 +92,79 @@
 					var z = ~~(i     ) - the.RZ;
 					return [x,y,z];
 				},
+
+				initialize: function(scrimmage, fun, value, sigma, rgba, normal) {
+					var flat;
+					switch(normal) {
+						case 0: flat = [1,2]; break;
+						case 1: flat = [0,2]; break;
+						case 2: flat = [0,1]; break;
+					}
+					rgba.update = false;
+					//console.log("INITIALIZE ", fun, "(", value, ")");
+					for (var i=scrimmage.lattice.length; i-- > 0;) {
+						var node = scrimmage.lattice[i];
+						var scale = 0.5 / scrimmage.size;
+						// Normalize coordinates
+						var xyz = [
+							Math.round(scale * node.position.x),
+							Math.round(scale * node.position.y),
+							Math.round(scale * node.position.z),
+						];
+						if (scrimmage[fun](xyz, value, sigma, scale, normal, flat)) {
+							rgba.i = i;
+							scrimmage.irgba(rgba);
+						}
+					}
+				},
+
+				init: function(parms) {
+					console.log("INIT:", parms);
+					the.initialize(
+						parms.scrimmage,
+						parms.fun,
+						parms.value,
+						parms.sigma,
+						{r: parms.r, g: parms.g, b: parms.b, a: parms.a},
+						parms.normal,
+					);
+				},
+
+				plane: function(xyz, value, sigma, scale, normal, flat) {
+					// TODO figure out why value == 1 is the same as value == 2
+					//console.log("zplane:", xyz);
+					var z = xyz[normal];
+					var upper = value + sigma, lower = value - sigma;
+					z = Math.round(z + 0.5 * z / Math.abs(z));
+					//console.log("zplane:", z);
+					return (z <= upper && z >= lower);
+				},
+
+				cylinder: function(xyz, value, sigma, scale, normal, flat) {
+					var x = xyz[flat[0]];
+					var y = xyz[flat[1]];
+					var r = Math.round(Math.sqrt(x**2 + y**2) + 0.5);
+					var upper = value + sigma, lower = value - sigma;
+					return (r <= upper && r >= lower);
+				},
+
+				sphere: function(xyz, value, sigma, scale, normal, flat) {
+					var x = xyz[0];
+					var y = xyz[1];
+					var z = xyz[2];
+					var r = Math.round(Math.sqrt(x**2 + y**2 + z**2) + 0.5);
+					var upper = value + sigma, lower = value - sigma;
+					return (r <= upper && r >= lower);
+				},
+
+				paraboloid: function(xyz, value, sigma, scale, normal, flat) {
+					var x = xyz[flat[0]];
+					var y = xyz[flat[1]];
+					var z = xyz[normal];
+					var r = Math.round((x**2 + y**2) / value + 0.5);
+					var upper = z + sigma, lower = z - sigma;
+					return (r <= upper && r >= lower);
+				}
 			};
 
 			// Radial axial node count of nodes beyond ctr
