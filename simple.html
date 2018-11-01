@@ -32,7 +32,7 @@ body{background-color: #808080}
 
 	doc.jlettvin = doc.jlettvin || {};
 	doc.jlettvin.scrimmage = doc.jlettvin.scrimmage || {
-		create: function create(arg) {
+		create: function(arg) {
 
 			var Rx, Ry, Rz;
 
@@ -42,12 +42,82 @@ body{background-color: #808080}
 			the = { // Data structure local to this instance
 				winW    : win.innerWidth,
 				winH    : win.innerHeight,
-				Acamera : 6.5,             // Orthogonal camera position distances
-				range   : 0.5,             // Scalars help nodes fit within window
-				edge    : 0.25,            // Should be range/2 to maintain gap
-				margin  : 0.9,             // Fit visualization to window
-				lattice : [],              // linear array of node objects
+				Acamera : 6.5,         // Orthogonal camera position distances
+				range   : 0.5,         // Scalars help nodes fit within window
+				edge    : 0.25,        // Should be range/2 to maintain gap
+				margin  : 0.9,         // Fit visualization to window
+				lattice : [],          // linear array of node objects
 				carrier : [],
+
+				clear: function(update = false) {
+					for(var i=the.lattice.length; i-- > 0;) {
+						var material = the.lattice[i].material;
+						Object.assign(material.color, {r:0, g:0, b:0});
+						material.opacity = 0;
+						material.needsUpdate = true;
+					}
+					if (update) {
+						renderLattice();
+						the.controls.update();
+					}
+				},
+
+				irgba: function(rgba) {
+					// Returns the previous values
+					if (rgba.i === "undefined") {
+						console.log("irgba: MISSING INDEX!");
+						return [0,0,0,0];
+					}
+					var i        = rgba.i;
+					var update   = false;
+					var colors   = false;
+					var node     = the.lattice[i];
+					var material = node.material;
+					var color    = material.color;
+					var opacity  = material.opacity;
+					var old      = [color.r, color.b, color.b, opacity];
+
+					for (var key in rgba) {
+						switch(key) {
+							case 'r': color.r = rgba.r; colors = true; break;
+							case 'g': color.g = rgba.g; colors = true; break;
+							case 'b': color.b = rgba.b; colors = true; break;
+							case 'a': material.opacity = rgba.a; colors = true; break;
+							case 'update': update = true; break;
+							default: break;
+						};
+					}
+
+					material.needsUpdate = true;
+
+					update && the.update();
+
+					return old;
+				},
+
+				update: function() {
+					renderLattice();
+					the.controls.update();
+				},
+
+				// Convert coordinates to index
+				xyz2i: function(xyz) {
+					//var the = document.jlettvin.scrimmage;
+					var value = 
+						the.axis[0][xyz[0]+the.RX] +
+						the.axis[1][xyz[1]+the.RY] +
+						the.axis[2][xyz[2]+the.RZ];
+					return (value);
+				},
+
+				// Convert index to coordinates
+				i2xyz: function(i) { // ~~(foo%bar) gives the integer modulus
+					//var the = document.jlettvin.scrimmage;
+					var x = ~~(i % the.DX) - the.RX; i /= the.DX;
+					var y = ~~(i % the.DY) - the.RY; i /= the.DY;
+					var z = ~~(i     ) - the.RZ;
+					return [x,y,z];
+				},
 			};
 
 			// Radial axial node count of nodes beyond ctr
@@ -183,60 +253,6 @@ body{background-color: #808080}
 			 */
 
 			// Change the node color/opacity
-			the.irgba    =   function(rgba) {
-				// Returns the previous values
-				if (rgba.i === "undefined") {
-					console.log("irgba: MISSING INDEX!");
-					return [0,0,0,0];
-				}
-				var i        = rgba.i;
-				var update   = false;
-				var colors   = false;
-				var node     = the.lattice[i];
-				var material = node.material;
-				var color    = material.color;
-				var opacity  = material.opacity;
-				var old      = [color.r, color.b, color.b, opacity];
-
-				for (var key in rgba) {
-					switch(key) {
-						case 'r': color.r = rgba.r; colors = true; break;
-						case 'g': color.g = rgba.g; colors = true; break;
-						case 'b': color.b = rgba.b; colors = true; break;
-						case 'a': material.opacity = rgba.a; colors = true; break;
-						case 'update': update = true; break;
-						default: break;
-					};
-				}
-
-				material.needsUpdate = true;
-
-				if (update) {
-					renderLattice();
-					the.controls.update();
-				}
-
-				return old;
-			}
-
-			// Convert coordinates to index
-			the.xyz2i = function(xyz) {
-				//var the = document.jlettvin.scrimmage;
-				var value = 
-					the.axis[0][xyz[0]+the.RX] +
-					the.axis[1][xyz[1]+the.RY] +
-					the.axis[2][xyz[2]+the.RZ];
-				return (value);
-			}
-
-			// Convert index to coordinates
-			the.i2xyz = function(i) { // ~~(foo%bar) gives the integer modulus
-				//var the = document.jlettvin.scrimmage;
-				var x = ~~(i % the.DX) - the.RX; i /= the.DX;
-				var y = ~~(i % the.DY) - the.RY; i /= the.DY;
-				var z = ~~(i     ) - the.RZ;
-				return [x,y,z];
-			}
 
 			function animationLoop() {
 				requestAnimationFrame(animationLoop);
@@ -297,13 +313,73 @@ body{background-color: #808080}
 	}
 })(document,window);
 
-	function initialize(scrimmage) {
+	function initialize(scrimmage, fun, value, rgba) {
+		rgba.update = false;
+		for (var i=scrimmage.lattice.length; i-- > 0;) {
+			var node = scrimmage.lattice[i];
+			var scale = 0.5 / scrimmage.size;
+			// Normalize coordinates
+			var xyz = [
+				Math.round(scale * node.position.x),
+				Math.round(scale * node.position.y),
+				Math.round(scale * node.position.z),
+			];
+			if (fun(xyz, value, scale)) {
+				rgba.i = i;
+				scrimmage.irgba(rgba);
+			}
+		}
 	}
 
-	var scrimmage1 = document.jlettvin.scrimmage.create({x:10, y:10, z:3});
+	function zplane(xyz, value, scale) {
+		// TODO figure out why value == 1 is the same as value == 2
+		//console.log("zplane:", xyz);
+		var z = xyz[2];
+		z = Math.round(z + 0.5 * z / Math.abs(z));
+		//console.log("zplane:", z);
+		return (z == value);
+	}
+
+	function zcylinder(xyz, value, scale) {
+		var x = xyz[0];
+		var y = xyz[1];
+		var r = Math.round(Math.sqrt(x**2 + y**2) + 0.5);
+		return (r == value);
+	}
+
+	function sphere(xyz, value, scale) {
+		var x = xyz[0];
+		var y = xyz[1];
+		var z = xyz[2];
+		var r = Math.round(Math.sqrt(x**2 + y**2 + z**2) + 0.5);
+		return (r == value);
+	}
+
+	function zparaboloid(xyz, value, scale) {
+		var x = xyz[0];
+		var y = xyz[1];
+		var z = xyz[2];
+		var r = Math.round((x**2 + y**2) / value + 0.5);
+		return (r == z);
+	}
+
+	var scrimmage1 = document.jlettvin.scrimmage.create({x:8, y:8, z:8});
 	scrimmage1.unitTest();
 	var iAnother = scrimmage1.xyz2i([0,0,1]);
 	scrimmage1.irgba({i: iAnother, r:0, g:1, b:0, a:1, update: true});
+	if (true) {
+		scrimmage1.clear(true);
+		console.log("ZPLANE(0)");
+		initialize(scrimmage1, zplane     , -2, {r:0, g:1, b:0, a:0.5});
+		console.log("ZPLANE(2)");
+		initialize(scrimmage1, zplane     ,  2, {r:0, g:0, b:1, a:0.5});
+		console.log("ZCYLINER(8)");
+		initialize(scrimmage1, zcylinder  ,  8, {r:1, g:1, b:0, a:0.5});
+		console.log("SPHERE(7)");
+		initialize(scrimmage1, sphere     ,  7, {r:1, g:0, b:0, a:0.5});
+		console.log("PARABOLOID(1)");
+		initialize(scrimmage1, zparaboloid, 12, {r:1, g:1, b:1, a:0.5});
+	}
 
 	// TODO separate shared trackball to control each window independently
 	//var scrimmage2 = document.jlettvin.scrimmage.create(2, 2, 2);
