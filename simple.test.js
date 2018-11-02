@@ -3,13 +3,13 @@
 (function(doc,win) {
 
 	// Construct a scrimmage
-	var scrimmage1 = document.jlettvin.scrimmage.create({x:7, y:7, z:7});
+	var scrimmage1 = document.jlettvin.scrimmage.create({x:10, y:10, z:10});
 
 	// Gain access to the data initializers
 	var choose = scrimmage1.initializers;
 
 	// Add some test names not in the initializers list
-	choose.push('many');
+	for (var choice of ['many', 'synchronic']) choose.push(choice);
 
 	// Keep index of last menu item for use in limiting choices
 	var last = choose.length - 1;
@@ -54,43 +54,52 @@
 	// Initialize shared initializer parameter
 	var parms = {
 		scrimmage: scrimmage1,  // the data set on which to operate
-		sigma: 0.5,             // acceptable variation from index value
+		sigma: 0.0,             // acceptable variation from index value
 		a: 1.0,                 // shared opacity
-		normal: 0,              // axis of directional geometry (not sphere)
+		normal: 2,              // axis of directional geometry (not sphere)
 		verbose: false,         // Output to console.log
 	}
 
 	// Run default tests for each initializer
+	function update(vals) { Object.assign(parms, vals); return parms; }
 	switch(key) {
 		case 'many':
-			function update(vals) { Object.assign(parms, vals); return parms; }
-			init(update({fun: "plane"      , value: -1, r:0, g: 1, b: 0}));
-			init(update({fun: "plane"      , value:  2, r:0, g: 0, b: 1}));
-			init(update({fun: "cylinder"   , value:  5, r:1, g: 1, b: 0}));
-			init(update({fun: "sphere"     , value:  6, r:1, g: 0, b: 0}));
-			init(update({fun: "paraboloid" , value: 10, r:1, g: 1, b: 1}));
+			init(update({fun: "plane"      , offset: -10            , r:0, g: 1, b: 0}));
+			init(update({fun: "plane"      , offset:  10            , r:0, g: 0, b: 1}));
+			init(update({fun: "cylinder"                , radius:  5, r:1, g: 1, b: 0}));
+			init(update({fun: "sphere"                  , radius:  5, r:1, g: 0, b: 0}));
+			init(update({fun: "paraboloid" , offset:  -9, radius:  7, r:1, g: 1, b: 1}));
+			break;
+		case 'synchronic':
+			init(update({fun: "paraboloid" , radius:  7, r:1, g: 0, b: 0}));
+			init(update({fun: "plane"      , offset:  4, r:0, g: 1, b: 0}));
+			init(update({fun: "cylinder"   , radius:  4, r:0, g: 0, b: 1}));
 			break;
 		case 'plane':
-			init(update({fun: key, value: -2, r:1, g: 1, b: 1}));
-			init(update({fun: key, value:  2, r:0, g: 0, b: 0}));
+			init(update({fun: key, offset: -1, r:1, g: 1, b: 1}));
+			init(update({fun: key, offset:  0, r:1, g: 0, b: 0}));
+			init(update({fun: key, offset:  1, r:0, g: 0, b: 0}));
 			break;
 		case 'sphere':
-			init(update({fun: key, value: 6, r:1, g: 1, b: 1}));
-			init(update({fun: key, value: 5, r:0, g: 0, b: 0}));
+			init(update({fun: key, radius: 10, r:1, g: 1, b: 1}));
+			init(update({fun: key, radius:  9, r:1, g: 0, b: 0}));
+			init(update({fun: key, radius:  8, r:0, g: 0, b: 0}));
 			break;
 		case 'cylinder':
-			init(update({fun: key, value: 7, r:1, g: 1, b: 1}));
-			init(update({fun: key, value: 6, r:1, g: 0, b: 0}));
-			init(update({fun: key, value: 5, r:0, g: 0, b: 0}));
+			init(update({fun: key, radius: 10, r:1, g: 1, b: 1}));
+			init(update({fun: key, radius:  9, r:1, g: 0, b: 0}));
+			init(update({fun: key, radius:  8, r:0, g: 0, b: 0}));
 			break;
 		case 'paraboloid':
-			init(update({fun: key, value: 10, r:1, g: 1, b: 1}));
-			init(update({fun: key, value:  8, r:0, g: 0, b: 0}));
+			init(update({fun: key, offset: -7, radius:  7, r:1, g: 1, b: 1, sigma: 1.0}));
+			init(update({fun: key, offset: -6, radius:  6, r:1, g: 0, b: 0, sigma: 1.0}));
+			init(update({fun: key, offset: -5, radius:  5, r:0, g: 0, b: 0, sigma: 1.0}));
 			break;
 		case 'points':
-			init(update({fun: key, value: 17, r:1, g: 1, b: 1}));
+			init(update({fun: key, offset: 31, r:1, g: 1, b: 1}));
 			break;
 	}
+	console.log("INITIALIZED");
 
 	// TODO separate shared trackball to control each window independently
 	//var scrimmage2 = document.jlettvin.scrimmage.create(2, 2, 2);

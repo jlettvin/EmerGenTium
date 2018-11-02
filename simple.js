@@ -40,33 +40,17 @@
 					// Returns the previous values
 					if (rgba.i === "undefined") {
 						console.log("irgba: MISSING INDEX!");
-						return [0,0,0,0];
+						return;
 					}
-					var i        = rgba.i;
-					var update   = false;
-					var colors   = false;
-					var node     = the.lattice[i];
+					var node     = the.lattice[rgba.i];
 					var material = node.material;
 					var color    = material.color;
-					var opacity  = material.opacity;
-					var old      = [color.r, color.b, color.b, opacity];
-
-					for (var key in rgba) {
-						switch(key) {
-							case 'r': color.r = rgba.r; colors = true; break;
-							case 'g': color.g = rgba.g; colors = true; break;
-							case 'b': color.b = rgba.b; colors = true; break;
-							case 'a': material.opacity = rgba.a; colors = true; break;
-							case 'update': update = true; break;
-							default: break;
-						};
-					}
+					color.r = rgba.r;
+					color.g = rgba.g;
+					color.b = rgba.b;
+					material.opacity = rgba.a;
 
 					material.needsUpdate = true;
-
-					update && the.update();
-
-					return old;
 				},
 
 				update: function() {
@@ -93,30 +77,32 @@
 					return [x,y,z];
 				},
 
-				initialize: function(scrimmage, fun, value, sigma, rgba, normal) {
+				initialize: function(scrimmage, fun, offset, radius, sigma, rgba, normal) {
 					// reimplement (merge) into init
 					// reimplement (avoid loops)
 					var flat;
+					var xyz;
 					switch(normal) {
 						case 0: flat = [1,2]; break;
 						case 1: flat = [0,2]; break;
 						case 2: flat = [0,1]; break;
 					}
-					rgba.update = false;
+					var scale = 0.5 / scrimmage.size;
 					for (var i=scrimmage.lattice.length; i-- > 0;) {
 						var node = scrimmage.lattice[i];
-						var scale = 0.5 / scrimmage.size;
 						// Normalize coordinates
 						var xyz = [
-							Math.round(scale * node.position.x),
-							Math.round(scale * node.position.y),
-							Math.round(scale * node.position.z),
+							Math.trunc(scale * node.position.x),
+							Math.trunc(scale * node.position.y),
+							Math.trunc(scale * node.position.z),
 						];
-						if (scrimmage[fun](xyz, rgba, value, sigma, scale, normal, flat)) {
+						if (scrimmage[fun](xyz, rgba, offset, radius, sigma, scale, normal, flat)) {
 							rgba.i = i;
 							scrimmage.irgba(rgba);
 						}
 					}
+					renderLattice();
+					the.controls.update();
 				},
 
 				init: function(parms) {
@@ -124,7 +110,8 @@
 					the.initialize(
 						parms.scrimmage,
 						parms.fun,
-						parms.value,
+						parms.offset,
+						parms.radius,
 						parms.sigma,
 						{r: parms.r, g: parms.g, b: parms.b, a: parms.a},
 						parms.normal,
@@ -134,44 +121,41 @@
 
 			var initializers = {
 
-				plane: function(xyz, rgba, value, sigma, scale, normal, flat) {
-					// TODO figure out why value == 1 is the same as value == 2
-					//console.log("zplane:", xyz);
+				plane: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
 					var z = xyz[normal];
-					var upper = value + sigma, lower = value - sigma;
-					z = Math.round(z + 0.5 * z / Math.abs(z));
-					//console.log("zplane:", z);
+					var upper = offset + sigma, lower = offset - sigma;
+					z = Math.trunc(z);
 					return (z <= upper && z >= lower);
 				},
 
-				cylinder: function(xyz, rgba, value, sigma, scale, normal, flat) {
+				cylinder: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
 					var x = xyz[flat[0]];
 					var y = xyz[flat[1]];
-					var r = Math.round(Math.sqrt(x**2 + y**2) + 0.5);
-					var upper = value + sigma, lower = value - sigma;
+					var r = Math.trunc(Math.sqrt(x**2 + y**2) + 0.5);
+					var upper = radius + sigma, lower = radius - sigma;
 					return (r <= upper && r >= lower);
 				},
 
-				sphere: function(xyz, rgba, value, sigma, scale, normal, flat) {
+				sphere: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
 					var x = xyz[0];
 					var y = xyz[1];
 					var z = xyz[2];
-					var r = Math.round(Math.sqrt(x**2 + y**2 + z**2) + 0.5);
-					var upper = value + sigma, lower = value - sigma;
+					var r = Math.trunc(Math.sqrt(x**2 + y**2 + z**2) + 0.5);
+					var upper = radius + sigma, lower = radius - sigma;
 					return (r <= upper && r >= lower);
 				},
 
-				paraboloid: function(xyz, rgba, value, sigma, scale, normal, flat) {
+				paraboloid: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
 					var x = xyz[flat[0]];
 					var y = xyz[flat[1]];
 					var z = xyz[normal];
-					var r = Math.round((x**2 + y**2) / value + 0.5);
+					var r = Math.trunc(offset / 2 + (x**2 + y**2) / radius + 0.5);
 					var upper = z + sigma, lower = z - sigma;
 					return (r <= upper && r >= lower);
 				},
 
-				points: function(xyz, rgba, value, sigma, scale, normal, flat) {
-					var ret = ((the.xyz2i(xyz) % value) == 0);
+				points: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
+					var ret = ((the.xyz2i(xyz) % offset) == 0);
 					if (ret) {
 						rgba.r = Math.random();
 						rgba.g = Math.random();
