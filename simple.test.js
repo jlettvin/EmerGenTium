@@ -71,7 +71,7 @@
 			init(update({fun: "paraboloid" , offset:  -9, radius:  7, r:1, g: 1, b: 1}));
 			break;
 		case 'synchronic':
-			init(update({fun: "paraboloid" , radius:  7, r:1, g: 0, b: 0}));
+			init(update({fun: "paraboloid" , offset: -7, radius:  7, r:1, g: 0, b: 0}));
 			init(update({fun: "plane"      , offset:  4, r:0, g: 1, b: 0}));
 			init(update({fun: "cylinder"   , radius:  4, r:0, g: 0, b: 1}));
 			break;
