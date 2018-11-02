@@ -112,7 +112,7 @@
 							Math.round(scale * node.position.y),
 							Math.round(scale * node.position.z),
 						];
-						if (scrimmage[fun](xyz, value, sigma, scale, normal, flat)) {
+						if (scrimmage[fun](xyz, rgba, value, sigma, scale, normal, flat)) {
 							rgba.i = i;
 							scrimmage.irgba(rgba);
 						}
@@ -130,8 +130,11 @@
 						parms.normal,
 					);
 				},
+			};
 
-				plane: function(xyz, value, sigma, scale, normal, flat) {
+			var initializers = {
+
+				plane: function(xyz, rgba, value, sigma, scale, normal, flat) {
 					// TODO figure out why value == 1 is the same as value == 2
 					//console.log("zplane:", xyz);
 					var z = xyz[normal];
@@ -141,7 +144,7 @@
 					return (z <= upper && z >= lower);
 				},
 
-				cylinder: function(xyz, value, sigma, scale, normal, flat) {
+				cylinder: function(xyz, rgba, value, sigma, scale, normal, flat) {
 					var x = xyz[flat[0]];
 					var y = xyz[flat[1]];
 					var r = Math.round(Math.sqrt(x**2 + y**2) + 0.5);
@@ -149,7 +152,7 @@
 					return (r <= upper && r >= lower);
 				},
 
-				sphere: function(xyz, value, sigma, scale, normal, flat) {
+				sphere: function(xyz, rgba, value, sigma, scale, normal, flat) {
 					var x = xyz[0];
 					var y = xyz[1];
 					var z = xyz[2];
@@ -158,15 +161,30 @@
 					return (r <= upper && r >= lower);
 				},
 
-				paraboloid: function(xyz, value, sigma, scale, normal, flat) {
+				paraboloid: function(xyz, rgba, value, sigma, scale, normal, flat) {
 					var x = xyz[flat[0]];
 					var y = xyz[flat[1]];
 					var z = xyz[normal];
 					var r = Math.round((x**2 + y**2) / value + 0.5);
 					var upper = z + sigma, lower = z - sigma;
 					return (r <= upper && r >= lower);
-				}
+				},
+
+				points: function(xyz, rgba, value, sigma, scale, normal, flat) {
+					var ret = ((the.xyz2i(xyz) % value) == 0);
+					if (ret) {
+						rgba.r = Math.random();
+						rgba.g = Math.random();
+						rgba.b = Math.random();
+						rgba.a = Math.random();
+					}
+					return ret;
+				},
+
 			};
+			Object.assign(the, initializers);
+			the.initializers = Object.keys(initializers);
+			console.log(the.initializers);
 
 			// Radial axial node count of nodes beyond ctr
 			the.RX = Rx;

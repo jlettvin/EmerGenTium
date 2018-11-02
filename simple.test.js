@@ -2,21 +2,35 @@
 
 (function(doc,win) {
 
-	var test = 3;
-	var choose = ["many", "plane", "sphere", "cylinder", "paraboloid"];
+	// Construct a scrimmage
+	var scrimmage1 = document.jlettvin.scrimmage.create({x:7, y:7, z:7});
+
+	// Gain access to the data initializers
+	var choose = scrimmage1.initializers;
+
+	// Add some test names not in the initializers list
+	choose.push('many');
+
+	// Keep index of last menu item for use in limiting choices
 	var last = choose.length - 1;
 
+	// Extract query dictionary from query string
 	var pairs = location.search.slice(1).split('&');
 	var query = {};
 	pairs.forEach(function(pair) {
 		pair = pair.split('=');
 		query[pair[0]] = decodeURIComponent(pair[1] || '');
 	});
-	var input = query['type'];
-	var reindex = choose.indexOf(input);
-	if (reindex > -1) test = reindex;
+	var input = query['initializer'];
+	var test = choose.indexOf(input);
+
+	// Chose a default initializer, in case the querystring is absent
+	if (test < 0) test = 0;
+
+	// Get the test name from its index
 	var key = choose[test > last ? last : (test < 0 ? 0 : test)];
 
+	// Generate buttons to enable choosing tests by user
 	var buttons = doc.getElementById("buttons");
 	var url = location.href.split('?')[0];
 	var qmark = url.indexOf('?');
@@ -24,17 +38,20 @@
 	for (var choice of choose) {
 		var btn = doc.createElement("BUTTON");
 		var t = document.createTextNode(choice);
-		var target = url + '?type=' + choice;
+		var target = url + '?initializer=' + choice;
 		btn.setAttribute("onClick", "window.location.href='"+target+"'");
 		btn.appendChild(t);
 		buttons.appendChild(btn);
 	}
 
-	var scrimmage1 = document.jlettvin.scrimmage.create({x:7, y:7, z:7});
+	// Run the builtin unit tests
 	scrimmage1.unitTest();
-	//var iAnother = scrimmage1.xyz2i([0,0,1]);
-	//scrimmage1.irgba({i: iAnother, r:0, g:1, b:0, a:1, update: true});
+	scrimmage1.clear(true);
+
+	// Simplify access to scrimmage initializer function
 	var init = scrimmage1.init;
+
+	// Initialize shared initializer parameter
 	var parms = {
 		scrimmage: scrimmage1,  // the data set on which to operate
 		sigma: 0.5,             // acceptable variation from index value
@@ -43,8 +60,7 @@
 		verbose: false,         // Output to console.log
 	}
 
-	//scrimmage1.clear(true);
-
+	// Run default tests for each initializer
 	switch(key) {
 		case 'many':
 			function update(vals) { Object.assign(parms, vals); return parms; }
@@ -70,6 +86,9 @@
 		case 'paraboloid':
 			init(update({fun: key, value: 10, r:1, g: 1, b: 1}));
 			init(update({fun: key, value:  8, r:0, g: 0, b: 0}));
+			break;
+		case 'points':
+			init(update({fun: key, value: 17, r:1, g: 1, b: 1}));
 			break;
 	}
 
