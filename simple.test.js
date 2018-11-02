@@ -46,7 +46,7 @@
 
 	// Run the builtin unit tests
 	scrimmage1.unitTest();
-	scrimmage1.clear(true);
+	scrimmage1.noise(0.05);
 
 	// Simplify access to scrimmage initializer function
 	var init = scrimmage1.init;
@@ -96,7 +96,7 @@
 			init(update({fun: key, offset: -5, radius:  5, r:0, g: 0, b: 0, sigma: 1.0}));
 			break;
 		case 'points':
-			init(update({fun: key, offset: 31, r:1, g: 1, b: 1}));
+			init(update({fun: key, opacity: 1, offset: 31}));
 			break;
 	}
 	console.log("INITIALIZED");

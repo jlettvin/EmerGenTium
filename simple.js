@@ -30,10 +30,21 @@
 						material.opacity = 0;
 						material.needsUpdate = true;
 					}
-					if (update) {
-						renderLattice();
-						the.controls.update();
+					if (update) the.update();
+				},
+
+				noise: function(opacity = 0.2, update = false) {
+					for(var i=the.lattice.length; i-- > 0;) {
+						var material = the.lattice[i].material;
+						Object.assign(material.color, {
+							r:Math.random(),
+							g:Math.random(),
+							b:Math.random(),
+						});
+						material.opacity = opacity;
+						material.needsUpdate = true;
 					}
+					if (update) the.update();
 				},
 
 				irgba: function(rgba) {
@@ -101,8 +112,7 @@
 							scrimmage.irgba(rgba);
 						}
 					}
-					renderLattice();
-					the.controls.update();
+					the.update();
 				},
 
 				init: function(parms) {
