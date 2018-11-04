@@ -1,57 +1,86 @@
 "use strict";
 
 (function(doc,win) {
-
 	// Construct a scrimmage
-	var scrimmage1 = document.jlettvin.scrimmage.create({x:10, y:10, z:10});
+	var radius = 10;
+	var scrimmage1 = document.jlettvin.scrimmage.create(
+		{x:radius, y:radius, z:radius});
+	var the = scrimmage1;
 
-	// Gain access to the data initializers
-	var choose = scrimmage1.initializers;
+	// Gain access to the data shapes
+	var shapeChoices = scrimmage1.shapes;
 
-	// Add some test names not in the initializers list
-	for (var choice of ['many', 'synchronic']) choose.push(choice);
+	// Add some test names not in the shapes list
+	for (var choice of ['many', 'synchronic']) shapeChoices.push(choice);
 
-	// Keep index of last menu item for use in limiting choices
-	var last = choose.length - 1;
+	// Keep index of last menu item for use in limiting shapeChoices
+	var last = shapeChoices.length - 1;
 
-	// Extract query dictionary from query string
-	var pairs = location.search.slice(1).split('&');
-	var query = {};
-	pairs.forEach(function(pair) {
-		pair = pair.split('=');
-		query[pair[0]] = decodeURIComponent(pair[1] || '');
-	});
-	var input = query['initializer'];
-	var test = choose.indexOf(input);
+	var shapeChoice = scrimmage1.query['SHAPE'];  // Note shape keys are uppercase.
+	//console.log("CHOICE:", shapeChoice);
+	var test = shapeChoices.indexOf(shapeChoice);
 
-	// Chose a default initializer, in case the querystring is absent
+	// Chose a default shape, in case the querystring is absent
 	if (test < 0) test = 0;
 
 	// Get the test name from its index
-	var key = choose[test > last ? last : (test < 0 ? 0 : test)];
+	var key = shapeChoices[test > last ? last : (test < 0 ? 0 : test)];
+	//console.log("KEY:", key, "TEST:", test);
 
-	// Generate buttons to enable choosing tests by user
-	var buttons = doc.getElementById("buttons");
+	/////////////////////////////////////////////////////////////////////
+	// Prepare to construct dropdown buttons
 	var url = location.href.split('?')[0];
 	var qmark = url.indexOf('?');
 	if (qmark >= 0) url = url.substr(qmark);
-	for (var choice of choose) {
-		var btn = doc.createElement("BUTTON");
-		var t = document.createTextNode(choice);
-		var target = url + '?initializer=' + choice;
-		btn.setAttribute("onClick", "window.location.href='"+target+"'");
-		btn.appendChild(t);
-		buttons.appendChild(btn);
+	var radiusKeys = ['RX', 'RY', 'RZ'];
+
+	// Construct size dropdown button
+	var sizeDropdown = doc.getElementById("sizeDropdown");
+	for (var size of [10, 20, 30]) {
+		// All radii the same
+		var ref = doc.createElement("A");
+		ref.innerHTML = "R=" + size;
+		var target = url + '?shape=' + shapeChoice;
+		for (var R of radiusKeys) { target += '&' + R + '=' + size; }
+		ref.setAttribute("href", target);
+		sizeDropdown.appendChild(ref);
+
+		for (var radKey of radiusKeys) {
+			// Each radius individually
+			var value = {RX: the.query.RX, RY: the.query.RY, RZ: the.query.RZ};
+			value[radKey] = size;
+			var ref = doc.createElement("A");
+			ref.innerHTML = radKey + '=' + size;
+			var target = url + '?shape=' + shapeChoice;
+			for (var R of radiusKeys) { target += '&' + R + '=' + value[R]; }
+			ref.setAttribute("href", target);
+			sizeDropdown.appendChild(ref);
+		}
 	}
+
+	// Construct shape dropdown button
+	var shapeDropdown  = doc.getElementById("shapeDropdown");
+	for (var choice of shapeChoices) {
+		var ref = doc.createElement("A");
+		ref.innerHTML = choice;
+		var target = url + '?shape=' + choice;
+		for (var R of radiusKeys) {
+			var val = scrimmage1.query[R];
+			target += '&' + R + '=' + (val == undefined ? val : '10');
+		}
+		ref.setAttribute("href", target);
+		shapeDropdown.appendChild(ref);
+	}
+	/////////////////////////////////////////////////////////////////////
 
 	// Run the builtin unit tests
 	scrimmage1.unitTest();
 	scrimmage1.noise(0.05);
 
-	// Simplify access to scrimmage initializer function
+	// Simplify access to scrimmage shape function
 	var init = scrimmage1.init;
 
-	// Initialize shared initializer parameter
+	// Initialize shared shape parameter
 	var parms = {
 		scrimmage: scrimmage1,  // the data set on which to operate
 		sigma: 0.0,             // acceptable variation from index value
@@ -60,15 +89,16 @@
 		verbose: false,         // Output to console.log
 	}
 
-	// Run default tests for each initializer
+	// Run default tests for each shape
 	function update(vals) { Object.assign(parms, vals); return parms; }
+	//console.log("CHOOSE KEY:", key);
 	switch(key) {
 		case 'many':
-			init(update({fun: "plane"      , offset: -10            , r:0, g: 1, b: 0}));
-			init(update({fun: "plane"      , offset:  10            , r:0, g: 0, b: 1}));
+			init(update({fun: "plane"      , offset: -radius        , r:0, g: 1, b: 0}));
+			init(update({fun: "plane"      , offset:  radius        , r:0, g: 0, b: 1}));
 			init(update({fun: "cylinder"                , radius:  5, r:1, g: 1, b: 0}));
-			init(update({fun: "sphere"                  , radius:  5, r:1, g: 0, b: 0}));
-			init(update({fun: "paraboloid" , offset:  -9, radius:  7, r:1, g: 1, b: 1}));
+			init(update({fun: "sphere"                  , radius:  7, r:1, g: 0, b: 0}));
+			init(update({fun: "paraboloid" , offset:  -9, radius:  7, r:1, g: 1, b: 1, sigma: 1}));
 			break;
 		case 'synchronic':
 			init(update({fun: "paraboloid" , offset: -7, radius:  7, r:1, g: 0, b: 0}));
@@ -81,19 +111,20 @@
 			init(update({fun: key, offset:  1, r:0, g: 0, b: 0}));
 			break;
 		case 'sphere':
-			init(update({fun: key, radius: 10, r:1, g: 1, b: 1}));
-			init(update({fun: key, radius:  9, r:1, g: 0, b: 0}));
-			init(update({fun: key, radius:  8, r:0, g: 0, b: 0}));
+			init(update({fun: key, radius: radius  , r:1, g: 1, b: 1}));
+			init(update({fun: key, radius: radius-1, r:1, g: 0, b: 0}));
+			init(update({fun: key, radius: radius-2, r:0, g: 0, b: 0}));
 			break;
 		case 'cylinder':
-			init(update({fun: key, radius: 10, r:1, g: 1, b: 1}));
-			init(update({fun: key, radius:  9, r:1, g: 0, b: 0}));
-			init(update({fun: key, radius:  8, r:0, g: 0, b: 0}));
+			//console.log("SWITCH:", radius);
+			init(update({fun: key, radius: radius  , r:1, g: 1, b: 1}));
+			init(update({fun: key, radius: radius-1, r:1, g: 0, b: 0}));
+			init(update({fun: key, radius: radius-2, r:0, g: 0, b: 0}));
 			break;
 		case 'paraboloid':
-			init(update({fun: key, offset: -7, radius:  7, r:1, g: 1, b: 1, sigma: 1.0}));
-			init(update({fun: key, offset: -6, radius:  6, r:1, g: 0, b: 0, sigma: 1.0}));
-			init(update({fun: key, offset: -5, radius:  5, r:0, g: 0, b: 0, sigma: 1.0}));
+			init(update({fun: key, offset: 4-radius, radius: radius-4, r:1, g: 1, b: 1, sigma: 1.0}));
+			init(update({fun: key, offset: 5-radius, radius: radius-5, r:1, g: 0, b: 0, sigma: 1.0}));
+			init(update({fun: key, offset: 6-radius, radius: radius-6, r:0, g: 0, b: 0, sigma: 1.0}));
 			break;
 		case 'points':
 			init(update({fun: key, opacity: 1, offset: 31}));

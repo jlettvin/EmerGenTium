@@ -1,5 +1,44 @@
 "use strict";
 
+
+
+
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function shapeFunction() {
+    document.getElementById("shapeDropdown").classList.toggle("show");
+}
+function sizeFunction() {
+    document.getElementById("sizeDropdown").classList.toggle("show");
+}
+
+	/*
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(e) {
+  //if (!event.target.matches('.dropbtn')) {
+  if (!e) e = event;
+  console.log("EVENT:", e);
+  if (!(e.target =='.dropbtn')) {
+
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+  */
+
+
+
+
+
+
+
+
 (function(doc,win) {
 	// TODO
 	// isize doesn't work, but perhaps we can do this all with opacity.
@@ -10,10 +49,48 @@
 
 			var Rx, Ry, Rz;
 
-			if (arg.length == undefined) { Rx = arg.x; Ry = arg.y; Rz = arg.z; }
-			else                      { Rx = arg[0]; Ry = arg[1]; Rz = arg[2]; }
+			var args = arg.length;
+			if (args == undefined) { Rx =  arg.x; Ry =  arg.y; Rz =  arg.z; }
+			else if(args == 3)     { Rx = arg[0]; Ry = arg[1]; Rz = arg[2]; }
 
-			var the = { // Data structure local to this instance
+			var the = {query: {}};
+
+			the.oldQuery = location.search.slice.length && location.search.slice(1);
+			function getQuery() { // Extract query dictionary from query string
+				//console.log("GETQUERY:", the.query);
+				var pairs = the.oldQuery.split('&');
+				the.query = {};
+				pairs.forEach(function(pair) {
+					pair = pair.split('=');
+					the.query[pair[0].toUpperCase()] =
+						decodeURIComponent(pair[1] || '');
+				});
+				the.query.RX = the.query.RX || Rx || 10;
+				the.query.RY = the.query.RY || Ry || 10;
+				the.query.RZ = the.query.RZ || Rz || 10;
+			}
+
+			function setQuery(name=null, value=null) {
+				//console.log("SETQUERY:", the.query);
+				var keys = Object.keys(the.query);
+				var twixt = '';
+				the.newQuery = "";
+				for (var key of keys) {
+					the.newQuery += twixt + key + '=';
+					the.newQuery += encodeURIComponent(the.query[key] || '');
+					twixt = '&';
+				};
+			}
+			the.setQuery = setQuery;
+
+			//console.log("OLD QUERY:", the.oldQuery);
+			getQuery();
+			//console.log("KEY QUERY:", the.query);
+			setQuery();
+			//console.log("NEW QUERY:", the.newQuery);
+
+			Object.assign(the, {
+				//the = { // Data structure local to this instance
 				winW    : win.innerWidth,
 				winH    : win.innerHeight,
 				Acamera : 6.5,         // Orthogonal camera position distances
@@ -48,8 +125,7 @@
 				},
 
 				irgba: function(rgba) {
-					// Returns the previous values
-					if (rgba.i === "undefined") {
+					if (rgba.i === undefined) {
 						console.log("irgba: MISSING INDEX!");
 						return;
 					}
@@ -73,18 +149,18 @@
 				xyz2i: function(xyz) {
 					//var the = document.jlettvin.scrimmage;
 					var value = 
-						the.axis[0][xyz[0]+the.RX] +
-						the.axis[1][xyz[1]+the.RY] +
-						the.axis[2][xyz[2]+the.RZ];
+						the.axis[0][xyz[0]+the.query.RX] +
+						the.axis[1][xyz[1]+the.query.RY] +
+						the.axis[2][xyz[2]+the.query.RZ];
 					return (value);
 				},
 
 				// Convert index to coordinates
 				i2xyz: function(i) { // ~~(foo%bar) gives the integer modulus
 					//var the = document.jlettvin.scrimmage;
-					var x = ~~(i % the.DX) - the.RX; i /= the.DX;
-					var y = ~~(i % the.DY) - the.RY; i /= the.DY;
-					var z = ~~(i     ) - the.RZ;
+					var x = ~~(i % the.DX) - the.query.RX; i /= the.DX;
+					var y = ~~(i % the.DY) - the.query.RY; i /= the.DY;
+					var z = ~~(i     ) - the.query.RZ;
 					return [x,y,z];
 				},
 
@@ -99,6 +175,7 @@
 						case 2: flat = [0,1]; break;
 					}
 					var scale = 0.5 / scrimmage.size;
+					//console.log("FUN:", fun, "ACT:", scrimmage[fun]);
 					for (var i=scrimmage.lattice.length; i-- > 0;) {
 						var node = scrimmage.lattice[i];
 						// Normalize coordinates
@@ -107,8 +184,10 @@
 							Math.trunc(scale * node.position.y),
 							Math.trunc(scale * node.position.z),
 						];
+						//console.log("USE:", fun);
 						if (scrimmage[fun](xyz, rgba, offset, radius, sigma, scale, normal, flat)) {
 							rgba.i = i;
+							//console.log("RGBA:", rgba);
 							scrimmage.irgba(rgba);
 						}
 					}
@@ -127,9 +206,9 @@
 						parms.normal,
 					);
 				},
-			};
+			});
 
-			var initializers = {
+			var shapes = {
 
 				plane: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
 					var z = xyz[normal];
@@ -143,7 +222,9 @@
 					var y = xyz[flat[1]];
 					var r = Math.trunc(Math.sqrt(x**2 + y**2) + 0.5);
 					var upper = radius + sigma, lower = radius - sigma;
-					return (r <= upper && r >= lower);
+					var ret = (r <= upper && r >= lower);
+					//console.log("RET:", ret, radius, sigma);
+					return ret;
 				},
 
 				sphere: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
@@ -176,22 +257,22 @@
 				},
 
 			};
-			Object.assign(the, initializers);
-			the.initializers = Object.keys(initializers);
-			console.log(the.initializers);
+			Object.assign(the, shapes);
+			the.shapes = Object.keys(shapes);
+			//console.log("SHAPES:", the.shapes);
 
 			// Radial axial node count of nodes beyond ctr
-			the.RX = Rx;
-			the.RY = Ry;
-			the.RZ = Rz;
+			//the.RX = the.query.RX;
+			//the.RY = the.query.RY;
+			//the.RZ = the.query.RZ;
 			// Counts of nodes along each axis (including 1 extra for center)
-			the.DX = 1 + 2 * the.RX;
-			the.DY = 1 + 2 * the.RY;
-			the.DZ = 1 + 2 * the.RZ;
+			the.DX = 1 + 2 * the.query.RX;
+			the.DY = 1 + 2 * the.query.RY;
+			the.DZ = 1 + 2 * the.query.RZ;
 			// Count of lattice vertices
 			the.N  = the.DX * the.DY * the.DZ;
 			// Use largest of radii to scale nodes to fit within window and axes
-			the.shrink  = 1.0 / Math.max(the.RX, Math.max(the.RY, the.RZ));
+			the.shrink  = 1.0 / Math.max(the.query.RX, Math.max(the.query.RY, the.query.RZ));
 			the.size    = the.shrink * the.edge;
 
 			//var sizes         = []; // node cube size array
@@ -253,13 +334,13 @@
 
 			// Construct lattice and indexable lattice list
 			the.bufGeom.fromGeometry(the.allGeom);
-			for(var k = -the.RZ; k <= the.RZ; ++k) {
+			for(var k = -the.query.RZ; k <= the.query.RZ; ++k) {
 				var z = the.shrink * k;
 				//var size = the.shrink * the.edge;
 				var material = {transparent: true, opacity: 0} ;
-				for(var j = -the.RY; j <= the.RY; ++j) {
+				for(var j = -the.query.RY; j <= the.query.RY; ++j) {
 					var y = the.shrink * j;
-					for(var i = -the.RX; i <= the.RX; ++i) {
+					for(var i = -the.query.RX; i <= the.query.RX; ++i) {
 						//sizes.push(size);
 						var x = the.shrink * i;
 						var nodeMat = new THREE.MeshLambertMaterial(material);
@@ -348,8 +429,6 @@
 			the.scene.add(the.ambientLight);
 			the.scene.add(the.axisHelper);
 			the.scene.add(the.nodeObject);
-
-			the.irgba({i: the.xyz2i([0,0,0]), r:1, g:0, b:0, a:1});  // add red cube
 
 			doc.body.appendChild(the.renderer.domElement);
 

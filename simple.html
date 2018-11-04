@@ -1,12 +1,120 @@
 <!DOCTYPE html>
 
+<!-- ****************************************************************************
+++                                                                             ++
+++         #######                          #####                              ++
+++         #        #    #  ######  #####  #     #  ######  #    #             ++
+++         #        ##  ##  #       #    # #        #       ##   #             ++
+++         #####    # ## #  #####   #    # #  ####  #####   # #  #             ++
+++         #        #    #  #       #####  #     #  #       #  # #             ++
+++         #        #    #  #       #   #  #     #  #       #   ##             ++
+++         #######  #    #  ######  #    #  #####   ######  #    #             ++
+++                                                                             ++
+++         EmerGen Emergent Behavior modeling                                  ++
+++                                                                             ++
+**         (c) Copyright 2018, Jonathan D. Lettvin                             ++
+**             All rights reserved.                                            **
+**                                                                             **
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
 <html>
-<style>
-body{background-color: #808080}
-table{background-color: white}
-td{text-align: center}
-</style>
 	<head>
+<style>
+
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	#######    #     #####
+	   #      # #   #     #
+	   #     #   #  #
+	   #    #     # #  ####
+	   #    ####### #     #
+	   #    #     # #     #
+	   #    #     #  #####
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+
+body{background-color: #808080}
+table{background-color: black}
+td{text-align: center}
+h1{text-align: center, margin: 0, padding: 0}
+
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	  ###   ######
+	   #    #     #
+	   #    #     #
+	   #    #     #
+	   #    #     #
+	   #    #     #
+	  ###   ######
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	 #####  #          #     #####   #####
+	#     # #         # #   #     # #     #
+	#       #        #   #  #       #
+	#       #       #     #  #####   #####
+	#       #       #######       #       #
+	#     # #       #     # #     # #     #
+	 #####  ####### #     #  #####   #####
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+.dropbtn {
+    background-color: #007f00;
+    color: white;
+    padding: 3px;
+    font-size: 16px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+    background-color: #004f00;
+	border: 1px solid black;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    background-color: white;
+    position: absolute;
+    /*min-width: 128px;*/
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 1px 1px;
+    background-color: #55dd55;
+    text-decoration: none;
+	border: 1px solid black;
+    display: block;
+}
+
+.dropdown a:hover {background-color: #ddd;}
+
+.show {display: block;}
+
+.RGBR { color: #ff7777; }
+.RGBG { color: #77ff77; }
+.RGBB { color: #7777ff; }
+.RGBW { color: #ffffff; }
+</style>
+
+		<script type="text/javascript" language="javascript">
+const __date       = "20180806"
+const __author     = "jlettvin"
+const __maintainer = "jlettvin"
+const __email      = "jlettvin@gmail.com"
+const __copyright  = "Copyright(c) 2018 Jonathan D. Lettvin, All Rights Reserved"
+const __license    = "GPL V3.0"
+const __status     = "Experiment"
+const __version    = "0.0.1"
+		</script>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<script
 			src="https://threejs.org/build/three.js">
 		</script>
@@ -16,25 +124,29 @@ td{text-align: center}
 	</head>
 	<body>
 		<table width="100%">
-			<tr>
-				<td colspan="2">
-					<big><big>EmerGenTium&trade;</big></big>
-				</td>
-				<!--
-				<td id="messages">
-					Messages appear here.
-				</td>
-				-->
-			</tr>
-			<tr>
-				<td colspan="2">
-					<small>
-					Copyright&copy;2018 Jonathan D. Lettvin, All Rights Reserved
-					</small>
-				</td>
-			</tr>
+			<tr><td><big><big><big><abbr
+					title="1) consortium members. 2) setting for activity">
+				<span class="RGBB">Emer</span>
+				<span class="RGBG">Gen</span>
+				<span class="RGBR">Tium</span>
+				<span>&trade;</span>
+			</abbr></big></big></big></td></tr>
+			<tr><td><span class="RGBW">
+			Copyright&copy;2018 Jonathan D. Lettvin, All Rights Reserved
+			</span></td></tr>
 		</table>
-		<div id="buttons" align="center"></div>
+		<div id="shapes" align="center"></div>
+		<div id="sizes"  align="center"></div>
+
+		<div class="dropdown">
+			<button onclick="sizeFunction()" class="dropbtn">sizes</button>
+			<div id="sizeDropdown" class="dropdown-content"></div>
+		</div>
+		<div class="dropdown">
+			<button onclick="shapeFunction()" class="dropbtn">shapes</button>
+			<div id="shapeDropdown" class="dropdown-content"></div>
+		</div>
+
 	</body>
 	<script src="simple.js"></script>
 	<script src="simple.test.js"></script>
