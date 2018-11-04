@@ -33,49 +33,71 @@
 	var qmark = url.indexOf('?');
 	if (qmark >= 0) url = url.substr(qmark);
 	var radiusKeys = ['RX', 'RY', 'RZ'];
+	var radii = [10, 20, 30];
+	var noiseChoices = [0.0, 0.01, 0.03, 0.1, 0.3];
+
+	// Generic button constructor
+	function makeQueryString(dropdown, label, shape, R, Noise) {
+		var ref = doc.createElement("A");
+		ref.innerHTML = label;
+		var target = url + '?shape=' + shape;
+		for (var i=0; i<3; ++i) target += '&' + radiusKeys[i] + '=' + R[i];
+		target += '&NOISE=' + Noise;
+		ref.setAttribute("href", target);
+		dropdown.appendChild(ref);
+	}
 
 	// Construct size dropdown button
 	var sizeDropdown = doc.getElementById("sizeDropdown");
-	for (var size of [10, 20, 30]) {
-		// All radii the same
-		var ref = doc.createElement("A");
-		ref.innerHTML = "R=" + size;
-		var target = url + '?shape=' + shapeChoice;
-		for (var R of radiusKeys) { target += '&' + R + '=' + size; }
-		ref.setAttribute("href", target);
-		sizeDropdown.appendChild(ref);
+	for (var size of radii) {
 
-		for (var radKey of radiusKeys) {
-			// Each radius individually
-			var value = {RX: the.query.RX, RY: the.query.RY, RZ: the.query.RZ};
-			value[radKey] = size;
-			var ref = doc.createElement("A");
-			ref.innerHTML = radKey + '=' + size;
-			var target = url + '?shape=' + shapeChoice;
-			for (var R of radiusKeys) { target += '&' + R + '=' + value[R]; }
-			ref.setAttribute("href", target);
-			sizeDropdown.appendChild(ref);
+		// All radii the same
+		makeQueryString(
+			sizeDropdown,
+			"R=" + size,
+			shapeChoice,
+			[size, size, size],
+			the.query.NOISE);
+
+		// One radius change only
+		for (var radIndex = 0; radIndex < 3; ++radIndex) {
+			var radii = [the.query.RX, the.query.RY, the.query.RZ];
+			radii[radIndex] = size;
+			makeQueryString(
+				sizeDropdown,
+				radiusKeys[radIndex] + '=' + size,
+				shapeChoice,
+				radii,
+				the.query.NOISE);
 		}
 	}
 
 	// Construct shape dropdown button
 	var shapeDropdown  = doc.getElementById("shapeDropdown");
 	for (var choice of shapeChoices) {
-		var ref = doc.createElement("A");
-		ref.innerHTML = choice;
-		var target = url + '?shape=' + choice;
-		for (var R of radiusKeys) {
-			var val = scrimmage1.query[R];
-			target += '&' + R + '=' + (val == undefined ? val : '10');
-		}
-		ref.setAttribute("href", target);
-		shapeDropdown.appendChild(ref);
+		makeQueryString(
+			shapeDropdown,
+			choice,
+			choice,
+			[the.query.RX, the.query.RY, the.query.RZ],
+			the.query.NOISE);
+	}
+
+	// Construct noise dropdown button
+	var noiseDropdown  = doc.getElementById("noiseDropdown");
+	for (var choice of noiseChoices) {
+		makeQueryString(
+			noiseDropdown,
+			"NOISE=" + choice,
+			shapeChoice,
+			[the.query.RX, the.query.RY, the.query.RZ],
+			choice);
 	}
 	/////////////////////////////////////////////////////////////////////
 
 	// Run the builtin unit tests
 	scrimmage1.unitTest();
-	scrimmage1.noise(0.05);
+	scrimmage1.noise();
 
 	// Simplify access to scrimmage shape function
 	var init = scrimmage1.init;

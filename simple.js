@@ -11,6 +11,9 @@ function shapeFunction() {
 function sizeFunction() {
     document.getElementById("sizeDropdown").classList.toggle("show");
 }
+function noiseFunction() {
+    document.getElementById("noiseDropdown").classList.toggle("show");
+}
 
 	/*
 // Close the dropdown if the user clicks outside of it
@@ -53,13 +56,12 @@ window.onclick = function(e) {
 			if (args == undefined) { Rx =  arg.x; Ry =  arg.y; Rz =  arg.z; }
 			else if(args == 3)     { Rx = arg[0]; Ry = arg[1]; Rz = arg[2]; }
 
-			var the = {query: {}};
+			var the = {query: {NOISE: 0.1}};
 
 			the.oldQuery = location.search.slice.length && location.search.slice(1);
 			function getQuery() { // Extract query dictionary from query string
 				//console.log("GETQUERY:", the.query);
 				var pairs = the.oldQuery.split('&');
-				the.query = {};
 				pairs.forEach(function(pair) {
 					pair = pair.split('=');
 					the.query[pair[0].toUpperCase()] =
@@ -68,6 +70,7 @@ window.onclick = function(e) {
 				the.query.RX = the.query.RX || Rx || 10;
 				the.query.RY = the.query.RY || Ry || 10;
 				the.query.RZ = the.query.RZ || Rz || 10;
+				the.query.NOISE = the.query.NOISE || 0.01;
 			}
 
 			function setQuery(name=null, value=null) {
@@ -110,7 +113,7 @@ window.onclick = function(e) {
 					if (update) the.update();
 				},
 
-				noise: function(opacity = 0.2, update = false) {
+				noise: function(update = false) {
 					for(var i=the.lattice.length; i-- > 0;) {
 						var material = the.lattice[i].material;
 						Object.assign(material.color, {
@@ -118,7 +121,7 @@ window.onclick = function(e) {
 							g:Math.random(),
 							b:Math.random(),
 						});
-						material.opacity = opacity;
+						material.opacity = the.query.NOISE;
 						material.needsUpdate = true;
 					}
 					if (update) the.update();
