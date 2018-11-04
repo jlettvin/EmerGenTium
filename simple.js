@@ -308,7 +308,8 @@ window.onclick = function(e) {
 				noZoom               : false,
 				noPan                : true,
 				staticMoving         : false,
-				dynamicDampingFactor : 0.2,
+				dynamicDampingFactor : 1.0,
+				//dynamicDampingFactor : 0.2,
 			});
 
 			// When to update
