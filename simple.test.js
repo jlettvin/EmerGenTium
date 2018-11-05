@@ -151,22 +151,22 @@
 			break;
 		case 'lines':
 			{
-				var rgba = {r:1, g:1, b:1, a:1};             // discardable temp
-				var xyz1  = [[-10,-10,-10], [+10,+10,+10]];  // segment ends
-				var xyz2  = [[+10,-10,-10], [-10,+10,+10]];  // segment ends
-				var xyz3  = [[-10,+10,-10], [+10,-10,+10]];  // segment ends
-				var xyz4  = [[-10,-10,+10], [+10,+10,-10]];  // segment ends
+				var RX = the.query.RX;
+				var RY = the.query.RY;
+				var RZ = the.query.RZ;
+				var white = {r:1, g:1, b:1, a:1};            // discardable temp
+				var red   = {r:1, g:0, b:0, a:1};            // discardable temp
+				var green = {r:0, g:1, b:0, a:1};            // discardable temp
+				var blue  = {r:0, g:0, b:1, a:1};            // discardable temp
+				var xyzw  = [[-RX,-RY,-RZ], [+RX,+RY,+RZ]];  // segment ends
+				var xyzr  = [[-RX,0,0], [+RX,0,0]];          // segment ends
+				var xyzg  = [[0,-RY,0], [0,+RY,0]];          // segment ends
+				var xyzb  = [[0,0,-RZ], [0,0,+RZ]];          // segment ends
 
-				the.line({xyz: xyz1, rgba: rgba});
-
-				Object.assign(rgba, {g:0, b:0});
-				the.line({xyz: xyz2, rgba: rgba});
-
-				Object.assign(rgba, {r: 0, g:1});
-				the.line({xyz: xyz3, rgba: rgba});
-
-				Object.assign(rgba, {g: 0, b:1});
-				the.line({xyz: xyz4, rgba: rgba});
+				the.line({xyz: xyzw, rgba: white});
+				the.line({xyz: xyzr, rgba:   red});
+				the.line({xyz: xyzg, rgba: green});
+				the.line({xyz: xyzb, rgba:  blue});
 
 				the.update();
 			}
