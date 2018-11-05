@@ -10,7 +10,6 @@
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 body{background-color: #808080}
-table{background-color: black}
 td{text-align: center}
 h1{text-align: center, margin: 0, padding: 0}
 
@@ -23,6 +22,18 @@ h1{text-align: center, margin: 0, padding: 0}
 	   #    #     #
 	  ###   ######
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+
+#title{
+	width: 100%;
+	background-color: black;
+}
+
+#hotkeys{
+	margin-right: 0;
+    font-size: 20px;
+	color: white;
+	background-color: #007f00;
+}
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	 #####  #          #     #####   #####
@@ -80,3 +91,9 @@ h1{text-align: center, margin: 0, padding: 0}
 .RGBB { color: #7777ff; }
 .RGBW { color: #ffffff; }
 
+.hotkey{
+    font-size: 24px;
+	color: black;
+	background-color: white;
+	padding: 4;
+}

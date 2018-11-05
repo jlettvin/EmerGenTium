@@ -31,6 +31,54 @@ function noiseFunction() {
 				}
 			}
 		}
+
+		if      (event.target.id == 'KeyA') { alongA(); }
+		else if (event.target.id == 'KeyX') { alongX(); }
+		else if (event.target.id == 'KeyY') { alongY(); }
+		else if (event.target.id == 'KeyZ') { alongZ(); }
+		else { console.log("KEYBOARD:", event); }
+	}
+
+	function alongA() {
+		var the = document.jlettvin.scrimmage.the;
+		console.log("alongA");
+		the.camera.position.set(the.Acamera,the.Acamera,the.Acamera);
+		the.update();
+	}
+	function alongX() {
+		var the = document.jlettvin.scrimmage.the;
+		console.log("alongX");
+		the.camera.position.set(the.orthogonal,0,0);
+		the.update();
+	}
+	function alongY() {
+		var the = document.jlettvin.scrimmage.the;
+		console.log("alongY");
+		the.camera.position.set(0,the.orthogonal,0);
+		the.update();
+	}
+	function alongZ() {
+		var the = document.jlettvin.scrimmage.the;
+		console.log("alongZ");
+		the.camera.position.set(0,0,the.orthogonal);
+		the.update();
+	}
+
+	// Handle hotkeys
+	function keyup(evt) {
+		var the = document.jlettvin.scrimmage.the;
+
+		console.log(evt);
+		switch(evt.code) {
+			case 'KeyA': alongA(); break;
+			case 'KeyX': alongX(); break;
+			case 'KeyY': alongY(); break;
+			case 'KeyZ': alongZ(); break;
+		}
+	}
+
+	win.onkeyup = function(evt) {
+		keyup(evt);
 	}
 
 	// Make semi-globals
@@ -433,6 +481,8 @@ function noiseFunction() {
 			}
 			// UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
 
+			the.orthogonal = Math.sqrt(3 * (the.Acamera ** 2));
+
 			the.scene.add(the.ambientLight);
 			the.scene.add(the.axisHelper);
 			the.scene.add(the.nodeObject);
@@ -441,6 +491,7 @@ function noiseFunction() {
 
 			animationLoop();
 
+			doc.jlettvin.scrimmage.the = the;
 			return the;
 		}
 	}

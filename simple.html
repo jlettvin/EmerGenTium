@@ -42,34 +42,56 @@ const __version    = "0.0.1"
 		</script>
 	</head>
 	<body>
-		<table width="100%">
-			<tr><td><big><big><big><abbr
+		<table id="title" width="100%">
+			<tr><td colspan="2"><big><big><big><abbr
 					title="1) consortium members. 2) setting for activity">
 				<span class="RGBB">Emer</span>
 				<span class="RGBG">Gen</span>
 				<span class="RGBR">Tium</span>
 				<span class="RGBW">&trade;</span>
 			</abbr></big></big></big></td></tr>
-			<tr><td><span class="RGBW"><small><small>
+			<tr><td colspan="2"><span class="RGBW"><small><small>
 			Copyright&copy;2018 Jonathan D. Lettvin, All Rights Reserved
 			</small></small></span></td></tr>
-		</table>
+			<tr><td>
 		<div id="shapes" align="center"></div>
 		<div id="sizes"  align="center"></div>
 
 		<div class="dropdown">
+			<abbr title="Change the radii defining any or all axes">
 			<button onclick="sizeFunction()" class="dropbtn">sizes</button>
 			<div id="sizeDropdown" class="dropdown-content"></div>
+			</abbr>
 		</div>
 		<div class="dropdown">
+			<abbr title="Change the shapes projected into the display volume">
 			<button onclick="shapeFunction()" class="dropbtn">shapes</button>
 			<div id="shapeDropdown" class="dropdown-content"></div>
+			</abbr>
 		</div>
 		<div class="dropdown">
+			<abbr title="Change the amount of noise in unspecified voxels">
 			<button onclick="noiseFunction()" class="dropbtn">noise</button>
 			<div id="noiseDropdown" class="dropdown-content"></div>
+			</abbr>
 		</div>
+		</td><td>
 
+		<span id="hotkeys"><b>
+			<abbr title="Reset camera to default angle/distance">
+				<span id="KeyA" class="hotkey">A</span></abbr>
+			<abbr title="Reset camera to view along X axis at default distance">
+				<span id="KeyX" class="hotkey">X</span></abbr>
+			<abbr title="Reset camera to view along Y axis at default distance">
+				<span id="KeyY" class="hotkey">Y</span></abbr>
+			<abbr title="Reset camera to view along Z axis at default distance">
+				<span id="KeyZ" class="hotkey">Z</span></abbr>
+		</b>
+		<abbr title="Hover mouse over letters to the left">hotkeys</abbr>
+		</span>
+
+			</td></tr>
+		</table>
 	</body>
 	<script src="simple.js"></script>
 	<script src="simple.test.js"></script>
