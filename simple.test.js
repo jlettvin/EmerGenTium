@@ -3,20 +3,18 @@
 (function(doc,win) {
 	// Construct a scrimmage
 	var radius = 10;
-	var scrimmage1 = document.jlettvin.scrimmage.create(
-		{x:radius, y:radius, z:radius});
-	var the = scrimmage1;
+	var the = document.jlettvin.scrimmage.create({x:radius, y:radius, z:radius});
 
 	// Gain access to the data shapes
-	var shapeChoices = scrimmage1.shapes;
+	var shapeChoices = the.shapes;
 
 	// Add some test names not in the shapes list
-	for (var choice of ['many', 'synchronic']) shapeChoices.push(choice);
+	for (var choice of ['many', 'synchronic', 'lines']) shapeChoices.push(choice);
 
 	// Keep index of last menu item for use in limiting shapeChoices
 	var last = shapeChoices.length - 1;
 
-	var shapeChoice = scrimmage1.query['SHAPE'];  // Note shape keys are uppercase.
+	var shapeChoice = the.query['SHAPE'];  // Note shape keys are uppercase.
 	//console.log("CHOICE:", shapeChoice);
 	var test = shapeChoices.indexOf(shapeChoice);
 
@@ -34,7 +32,7 @@
 	if (qmark >= 0) url = url.substr(qmark);
 	var radiusKeys = ['RX', 'RY', 'RZ'];
 	var radii = [10, 20, 30];
-	var noiseChoices = [0.0, 0.01, 0.03, 0.1, 0.3];
+	var noiseChoices = [0.0, 0.03, 0.1, 0.3, 1.0];
 
 	// Generic button constructor
 	function makeQueryString(dropdown, label, shape, R, Noise) {
@@ -96,15 +94,15 @@
 	/////////////////////////////////////////////////////////////////////
 
 	// Run the builtin unit tests
-	scrimmage1.unitTest();
-	scrimmage1.noise();
+	the.unitTest();
+	the.noise();
 
 	// Simplify access to scrimmage shape function
-	var init = scrimmage1.init;
+	var init = the.init;
 
 	// Initialize shared shape parameter
 	var parms = {
-		scrimmage: scrimmage1,  // the data set on which to operate
+		scrimmage: the,         // the data set on which to operate
 		sigma: 0.0,             // acceptable variation from index value
 		a: 1.0,                 // shared opacity
 		normal: 2,              // axis of directional geometry (not sphere)
@@ -150,6 +148,28 @@
 			break;
 		case 'points':
 			init(update({fun: key, opacity: 1, offset: 31}));
+			break;
+		case 'lines':
+			{
+				var rgba = {r:1, g:1, b:1, a:1};             // discardable temp
+				var xyz1  = [[-10,-10,-10], [+10,+10,+10]];  // segment ends
+				var xyz2  = [[+10,-10,-10], [-10,+10,+10]];  // segment ends
+				var xyz3  = [[-10,+10,-10], [+10,-10,+10]];  // segment ends
+				var xyz4  = [[-10,-10,+10], [+10,+10,-10]];  // segment ends
+
+				the.line({xyz: xyz1, rgba: rgba});
+
+				Object.assign(rgba, {g:0, b:0});
+				the.line({xyz: xyz2, rgba: rgba});
+
+				Object.assign(rgba, {r: 0, g:1});
+				the.line({xyz: xyz3, rgba: rgba});
+
+				Object.assign(rgba, {g: 0, b:1});
+				the.line({xyz: xyz4, rgba: rgba});
+
+				the.update();
+			}
 			break;
 	}
 	console.log("INITIALIZED");

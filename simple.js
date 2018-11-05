@@ -15,37 +15,25 @@ function noiseFunction() {
     document.getElementById("noiseDropdown").classList.toggle("show");
 }
 
-	/*
-// Close the dropdown if the user clicks outside of it
-window.onclick = function(e) {
-  //if (!event.target.matches('.dropbtn')) {
-  if (!e) e = event;
-  console.log("EVENT:", e);
-  if (!(e.target =='.dropbtn')) {
-
-    var dropdowns = document.getElementsByClassName("dropdown-content");
-    var i;
-    for (i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
-    }
-  }
-}
-  */
-
-
-
-
-
-
-
-
 (function(doc,win) {
 	// TODO
 	// isize doesn't work, but perhaps we can do this all with opacity.
 
+	// Close the dropdown if the user clicks outside of it
+	win.onclick = function(event) {
+		if (!event.target.matches('.dropbtn')) {
+			var dropdowns = document.getElementsByClassName("dropdown-content");
+			var i;
+			for (i = 0; i < dropdowns.length; i++) {
+				var openDropdown = dropdowns[i];
+				if (openDropdown.classList.contains('show')) {
+					openDropdown.classList.remove('show');
+				}
+			}
+		}
+	}
+
+	// Make semi-globals
 	doc.jlettvin = doc.jlettvin || {};
 	doc.jlettvin.scrimmage = doc.jlettvin.scrimmage || {
 		create: function(arg) {
@@ -64,8 +52,10 @@ window.onclick = function(e) {
 				var pairs = the.oldQuery.split('&');
 				pairs.forEach(function(pair) {
 					pair = pair.split('=');
-					the.query[pair[0].toUpperCase()] =
-						decodeURIComponent(pair[1] || '');
+					var theString = decodeURIComponent(pair[1] || '');
+					var theNumber = Number(theString);
+					var theValue  = Number.isNaN(theNumber) ? theString : theNumber;
+					the.query[pair[0].toUpperCase()] = theValue;
 				});
 				the.query.RX = the.query.RX || Rx || 10;
 				the.query.RY = the.query.RY || Ry || 10;
@@ -167,47 +157,79 @@ window.onclick = function(e) {
 					return [x,y,z];
 				},
 
-				initialize: function(scrimmage, fun, offset, radius, sigma, rgba, normal) {
-					// reimplement (merge) into init
-					// reimplement (avoid loops)
+				init: function(parms) {
+					if (parms.verbose == true) console.log("INIT:", parms);
 					var flat;
 					var xyz;
-					switch(normal) {
+					switch(parms.normal) {
 						case 0: flat = [1,2]; break;
 						case 1: flat = [0,2]; break;
 						case 2: flat = [0,1]; break;
 					}
-					var scale = 0.5 / scrimmage.size;
-					//console.log("FUN:", fun, "ACT:", scrimmage[fun]);
-					for (var i=scrimmage.lattice.length; i-- > 0;) {
-						var node = scrimmage.lattice[i];
+					var rgba = {r: parms.r, g: parms.g, b: parms.b, a: parms.a};
+					var scale = 0.5 / parms.scrimmage.size;
+					for (var i=parms.scrimmage.lattice.length; i-- > 0;) {
+						var node = parms.scrimmage.lattice[i];
 						// Normalize coordinates
 						var xyz = [
 							Math.trunc(scale * node.position.x),
 							Math.trunc(scale * node.position.y),
 							Math.trunc(scale * node.position.z),
 						];
-						//console.log("USE:", fun);
-						if (scrimmage[fun](xyz, rgba, offset, radius, sigma, scale, normal, flat)) {
+						//console.log("USE:", parms.fun);
+						if (parms.scrimmage[parms.fun](
+							xyz, rgba, parms.offset, parms.radius, parms.sigma,
+							scale, parms.normal, flat))
+						{
 							rgba.i = i;
 							//console.log("RGBA:", rgba);
-							scrimmage.irgba(rgba);
+							parms.scrimmage.irgba(rgba);
 						}
 					}
 					the.update();
 				},
 
-				init: function(parms) {
-					if (parms.verbose == true) console.log("INIT:", parms);
-					the.initialize(
-						parms.scrimmage,
-						parms.fun,
-						parms.offset,
-						parms.radius,
-						parms.sigma,
-						{r: parms.r, g: parms.g, b: parms.b, a: parms.a},
-						parms.normal,
-					);
+				line: function(parms) {
+
+					/*
+void plotLine3d(int x0, int y0, int z0, int x1, int y1, int z1)
+{
+   int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
+   int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1; 
+   int dz = abs(z1-z0), sz = z0<z1 ? 1 : -1; 
+   int dm = max(dx,dy,dz), i = dm; // maximum difference
+   x1 = y1 = z1 = dm/2; // error offset
+ 
+   for(;;) {  // loop
+      setPixel(x0,y0,z0);
+      if (i-- == 0) break;
+      x1 -= dx; if (x1 < 0) { x1 += dm; x0 += sx; } 
+      y1 -= dy; if (y1 < 0) { y1 += dm; y0 += sy; } 
+      z1 -= dz; if (z1 < 0) { z1 += dm; z0 += sz; } 
+   }
+}
+*/
+					console.log("LINE:", parms);
+					var rgba = parms.rgba;
+					var x0 = parms.xyz[0][0]
+					var y0 = parms.xyz[0][1]
+					var z0 = parms.xyz[0][2]
+					var x1 = parms.xyz[1][0]
+					var y1 = parms.xyz[1][1]
+					var z1 = parms.xyz[1][2]
+					var dx = Math.abs(x1-x0), sx = x0<x1 ? 1 : -1;
+					var dy = Math.abs(y1-y0), sy = y0<y1 ? 1 : -1;
+					var dz = Math.abs(z1-z0), sz = z0<z1 ? 1 : -1;
+					var dm = Math.max(dx, dy, dz), i = dm;
+					x1 = y1 = z1 = dm/2; // error offset
+					for(;;) {  // loop
+						rgba.i = the.xyz2i([x0, y0, z0]);
+						the.irgba(rgba);
+						if (i-- == 0) break;
+						x1 -= dx; if (x1 < 0) { x1 += dm; x0 += sx; } 
+						y1 -= dy; if (y1 < 0) { y1 += dm; y0 += sy; } 
+						z1 -= dz; if (z1 < 0) { z1 += dm; z0 += sz; } 
+					}
 				},
 			});
 
@@ -411,7 +433,7 @@ window.onclick = function(e) {
 				var test = function(unit, result, title) {
 					const msg = ["[FAIL]", "[PASS]"];
 					var PF = msg[~~result];
-					console.log(PF, result, "UNIT(", unit, "): ", title);
+					console.log("UNIT(", unit, "): ", PF, result, title);
 				}
 
 				// 11111111111111111111111111111111111111111111111111111111111111
