@@ -16,6 +16,7 @@ function noiseDropdownFunction() {
 
 	// Close the dropdown if the user clicks outside of it
 	win.onclick = function(event) {
+		var the = document.jlettvin.scrimmage.the;
 		if (!event.target.matches('.dropbtn')) {
 			var dropdowns = document.getElementsByClassName("dropdown-content");
 			var i;
@@ -264,11 +265,15 @@ function noiseDropdownFunction() {
 					}
 				},
 
-				trail: function(pen, xyz, rgba) {
+				pixel: function(pen, xyz, rgba) {
 					// TODO add sign * 0.5 to each increment
 					if (pen) {
 						var irgba = {};
-						var xyzn = [~~(xyz[0]), ~~(xyz[1]), ~~(xyz[2])];
+						// round away from 0
+						var x = xyz[0]; x += (x < 0) ? -0.5 : +0.5;
+						var y = xyz[1]; y += (y < 0) ? -0.5 : +0.5;
+						var z = xyz[2]; z += (z < 0) ? -0.5 : +0.5;
+						var xyzn = [~~x, ~~y, ~~z];
 						Object.assign(irgba, rgba);
 						irgba.i = the.xyz2i(xyzn);
 						the.irgba(irgba);
@@ -281,8 +286,12 @@ function noiseDropdownFunction() {
 						count += !count;
 						the.verbose("MARCH:", count, ijk);
 						while (count-- > 0) {
-							xyz = [xyz[0]+ijk[0],xyz[1]+ijk[1],xyz[2]+ijk[2]];
-							the.trail(pen, xyz, rgba);
+							xyz = [
+								xyz[0]+ijk[0],
+								xyz[1]+ijk[1],
+								xyz[2]+ijk[2]
+							];
+							the.pixel(pen, xyz, rgba);
 						}
 					}
 					return xyz;
@@ -302,7 +311,7 @@ function noiseDropdownFunction() {
 						"^\\[" + VALUE + "," + VALUE + "," + VALUE + "\\]");
 					var BRACK = new RegExp(
 						"^\\{" + VALUE + "," + VALUE + "," + VALUE + "," + VALUE + "\\}");
-					var LEGAL =  new RegExp("^([0-9F \*]+)");
+					var LEGAL =  new RegExp("^([0-9AXYZF \*]+)");
 					var result = null;
 					do {
 						result = stream.match(PAREN);
@@ -367,7 +376,7 @@ function noiseDropdownFunction() {
 									case '*':
 										//the.verbose("DN");
 										pen =  true;
-										the.trail(pen, xyz, rgba);
+										the.pixel(pen, xyz, rgba);
 										count = 0;
 										break;
 									case 'F': // forward
@@ -375,6 +384,10 @@ function noiseDropdownFunction() {
 										xyz = the.march(pen, count, xyz, ijk, rgba);
 										count = 0;
 										break;
+									case 'A': alongA(); count = 0; break;
+									case 'X': alongX(); count = 0; break;
+									case 'Y': alongY(); count = 0; break;
+									case 'Z': alongZ(); count = 0; break;
 									default:
 										the.verbose("INVALID T '"+ch+"'");
 										return;
