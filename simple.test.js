@@ -9,7 +9,9 @@
 	var shapeChoices = the.shapes;
 
 	// Add some test names not in the shapes list
-	for (var choice of ['many', 'synchronic', 'lines']) shapeChoices.push(choice);
+	for (var choice of ['many', 'synchronic', 'lines', 'turtle']) {
+		shapeChoices.push(choice);
+	}
 
 	// Keep index of last menu item for use in limiting shapeChoices
 	var last = shapeChoices.length - 1;
@@ -188,7 +190,22 @@
 
 			the.update();
 		}
+
+		function turtle() {
+			the.turtle(
+				"(5,5,5)" +            // Where to start (implies ' ')
+				"[1,0,0]" +            // Which direction to go
+				"<2,2,2>" +            // Which way is up
+				"{0,0,0,1}" +          // What color/opacity to use
+				"*FFFFFLURD "              // Turtle commands
+			);
+			the.update();
+		}
+
 		switch(key) {
+			case 'turtle':
+				turtle();
+				break;
 			case 'lines':
 				lines();
 				break;

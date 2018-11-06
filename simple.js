@@ -1,17 +1,12 @@
 "use strict";
 
-
-
-
-/* When the user clicks on the button, 
-toggle between hiding and showing the dropdown content */
-function shapeFunction() {
+function shapeDropdownFunction() {
     document.getElementById("shapeDropdown").classList.toggle("show");
 }
-function sizeFunction() {
+function sizeDropdownFunction() {
     document.getElementById("sizeDropdown").classList.toggle("show");
 }
-function noiseFunction() {
+function noiseDropdownFunction() {
     document.getElementById("noiseDropdown").classList.toggle("show");
 }
 
@@ -260,6 +255,124 @@ function noiseFunction() {
 						z1 -= dz; if (z1 < 0) { z1 += dm; z0 += sz; } 
 					}
 				},
+
+				trail: function(pen, xyz, rgba) {
+					if (pen) {
+						var irgba = {};
+						var xyzn = [~~(xyz[0]), ~~(xyz[1]), ~~(xyz[2])];
+						Object.assign(irgba, rgba);
+						irgba.i = the.xyz2i(xyzn);
+						the.irgba(irgba);
+					}
+					console.log("TRAIL:", pen, xyzn, irgba);
+				},
+
+				turtle: function(stream) {
+					var res;
+					var pen = false;
+					var i = 0, I = stream.length;
+					var ch;
+					var xyz = [0,0,0];
+					var ijk = [1,0,0];
+					var mno = [1,0,0];
+					var rgba = {r:0, g:0, b:0, a:0};
+					var error = function(msg) { console.log("ERROR:", msg); }
+					// Where to start
+					var XYZ = /\(([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*)\)/;
+					// Which direction to go
+					var IJK = /\[([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*)\]/;
+					// Which way is "UP"
+					var MNO = /\<([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*)\>/;
+					// What color/opacity to use
+					var RGBA = /\{([0-9]+\.?[0-9]*),([0-9]+\.?[0-9]*),([0-9]+\.?[0-9]*),([0-9]+\.?[0-9]*)\}/;
+					while (stream.length) {
+						console.log("STREAM:", stream);
+
+						// Jump to coordinates (x,y,z)
+						res = XYZ.exec(stream);
+						if (res && res.length == 4) {
+							xyz[0] = Number(res[1]);
+							xyz[1] = Number(res[2]);
+							xyz[2] = Number(res[3]);
+							stream = stream.substr(res[0].length);
+							console.log("XYZ:", xyz, stream, res);
+							continue;
+						}
+
+						// Set direction to (i,j,k)
+						res = IJK.exec(stream);
+						if (res && res.length == 4) {
+							ijk[0] = parseFloat(res[1]);
+							ijk[1] = parseFloat(res[2]);
+							ijk[2] = parseFloat(res[3]);
+							var norm = Math.sqrt(ijk[0]**2 + ijk[1]**2 + ijk[2]**2);
+							if (norm == 0) { error("Vector length 0"); break; }
+							ijk[0] /= norm;
+							ijk[1] /= norm;
+							ijk[2] /= norm;
+							stream = stream.substr(res[0].length);
+							console.log("IJK:", ijk, stream, res);
+							continue;
+						}
+
+						// Set head "up" to <m,n,o>
+						res = MNO.exec(stream);
+						if (res && res.length == 4) {
+							mno[0] = parseFloat(res[1]);
+							mno[1] = parseFloat(res[2]);
+							mno[2] = parseFloat(res[3]);
+							var norm = Math.sqrt(mno[0]**2 + mno[1]**2 + mno[2]**2);
+							if (norm == 0) { error("Vector length 0"); break; }
+							mno[0] /= norm;
+							mno[1] /= norm;
+							mno[2] /= norm;
+							stream = stream.substr(res[0].length);
+							console.log("MNO:", mno, stream, res);
+							continue;
+						}
+
+						// Set color to {r,g,b,a}
+						res = RGBA.exec(stream);
+						if (res && res.length == 5) {
+							rgba.r = Number(res[1]);
+							rgba.g = Number(res[2]);
+							rgba.b = Number(res[3]);
+							rgba.a = Number(res[4]);
+							stream = stream.substr(res[0].length);
+							console.log("RGBA:", rgba, stream, res);
+							continue;
+						}
+
+						ch = stream[0];
+						stream = stream.substr(1);
+
+						switch(ch) {
+							case ' ':
+								pen = false;
+								break; // pen up
+							case '*':
+								pen =  true;
+								the.trail(pen, xyz, rgba);
+								break;
+							case 'F': // forward
+								xyz = [xyz[0]+ijk[0],xyz[1]+ijk[1],xyz[2]+ijk[2]];
+								the.trail(pen, xyz, rgba);
+								break;
+							case 'L': // left
+							case 'R': // right
+							case 'U': // up
+							case 'D': // down
+								console.log("TURTLE UNIMPLEMENTED:", ch);
+								break;
+							default:
+								error("INVALID T '"+ch+"'");
+								return;
+								break;
+						}
+
+						continue;
+					}
+				},
 			});
 
 			var shapes = {
@@ -475,7 +588,18 @@ function noiseFunction() {
 						"index <-> [x,y,z] cvt");
 				}
 
-				var units = [unit1];            // List of tests
+				// 22222222222222222222222222222222222222222222222222222222222222
+				var unit2 = function() {
+					the.turtle(
+						"(5,5,5)" +            // Where to start (implies ' ')
+						"[1,2,3]" +            // Which direction to go
+						"<2,2,2>" +            // Which way is up
+						"{0,0,0,1}" +          // What color/opacity to use
+						"*FLURD "              // Turtle commands
+					);
+				}
+
+				var units = [unit1, unit2];     // List of tests
 
 				for(var unit of units) unit();  // Execute tests in list
 			}
