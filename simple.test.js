@@ -135,16 +135,16 @@
 
 		var cases = {
 			many: [
-				{fun: "plane"      , offset: -RZ             , r:0, g: 1, b: 0, normal: 2},
-				{fun: "plane"      , offset:  RZ             , r:0, g: 0, b: 1, normal: 2},
-				{fun: "cylinder"                 , radius:  5, r:1, g: 1, b: 0, normal: 2},
-				{fun: "sphere"                   , radius:  7, r:1, g: 0, b: 0},
-				{fun: "paraboloid" , offset:  -9 , radius:  7, r:1, g: 1, b: 1, sigma: 1},
+				{fun: "plane"      , offset: -RZ            , r:0, g: 1, b: 0, normal: 2},
+				{fun: "plane"      , offset:  RZ            , r:0, g: 0, b: 1, normal: 2},
+				{fun: "cylinder"                , radius:  5, r:1, g: 1, b: 0, normal: 2},
+				{fun: "sphere"                  , radius:  7, r:1, g: 0, b: 0},
+				{fun: "paraboloid" , offset:  -9, radius:  7, r:1, g: 1, b: 1, sigma: 1},
 			],
 			synchronic: [
-				{fun: "paraboloid" , offset: -7, RXY:  7, r:1, g: 0, b: 0},
-				{fun: "plane"      , offset:  4         , r:0, g: 1, b: 0},
-				{fun: "cylinder"   , radius:  4         , r:0, g: 0, b: 1},
+				{fun: "paraboloid" , offset:  -9, radius:  7, r:1, g: 0, b: 0},
+				{fun: "plane"      , offset:   4            , r:0, g: 1, b: 0},
+				{fun: "cylinder"   , offset:   4, radius:  7, r:0, g: 0, b: 1},
 			],
 			plane: [
 				{fun: key, offset: -1, r:1, g: 1, b: 1},
@@ -203,7 +203,7 @@
 				"{0,0,1,1}[+0,-1,+0]5F" +  // blue
 				"{1,1,0,1}[+0,+0,+1]6F" +  // yellow
 				"{1,1,1,1}[+1,-7,-9]100F" +  // yellow
-				"(-10,10,10)[1,-1,0]{0,1,1,1}*10F" +
+				"(-5,5,5)[1,-1,0]{0,1,1,1}*10F" +
 				" "
 			);
 			the.update();
