@@ -31,30 +31,30 @@ function noiseDropdownFunction() {
 		else if (event.target.id == 'KeyX') { alongX(); }
 		else if (event.target.id == 'KeyY') { alongY(); }
 		else if (event.target.id == 'KeyZ') { alongZ(); }
-		else { console.log("KEYBOARD:", event); }
+		else { the.verbose("KEYBOARD:", event); }
 	}
 
 	function alongA() {
 		var the = document.jlettvin.scrimmage.the;
-		console.log("alongA");
+		the.verbose("alongA");
 		the.camera.position.set(the.Acamera,the.Acamera,the.Acamera);
 		the.update();
 	}
 	function alongX() {
 		var the = document.jlettvin.scrimmage.the;
-		console.log("alongX");
+		the.verbose("alongX");
 		the.camera.position.set(the.orthogonal,0,0);
 		the.update();
 	}
 	function alongY() {
 		var the = document.jlettvin.scrimmage.the;
-		console.log("alongY");
+		the.verbose("alongY");
 		the.camera.position.set(0,the.orthogonal,0);
 		the.update();
 	}
 	function alongZ() {
 		var the = document.jlettvin.scrimmage.the;
-		console.log("alongZ");
+		the.verbose("alongZ");
 		the.camera.position.set(0,0,the.orthogonal);
 		the.update();
 	}
@@ -63,7 +63,7 @@ function noiseDropdownFunction() {
 	function keyup(evt) {
 		var the = document.jlettvin.scrimmage.the;
 
-		console.log(evt);
+		the.verbose(evt);
 		switch(evt.code) {
 			case 'KeyA': alongA(); break;
 			case 'KeyX': alongX(); break;
@@ -91,7 +91,7 @@ function noiseDropdownFunction() {
 
 			the.oldQuery = location.search.slice.length && location.search.slice(1);
 			function getQuery() { // Extract query dictionary from query string
-				//console.log("GETQUERY:", the.query);
+				//the.verbose("GETQUERY:", the.query);
 				var pairs = the.oldQuery.split('&');
 				pairs.forEach(function(pair) {
 					pair = pair.split('=');
@@ -107,7 +107,7 @@ function noiseDropdownFunction() {
 			}
 
 			function setQuery(name=null, value=null) {
-				//console.log("SETQUERY:", the.query);
+				//the.verbose("SETQUERY:", the.query);
 				var keys = Object.keys(the.query);
 				var twixt = '';
 				the.newQuery = "";
@@ -119,11 +119,11 @@ function noiseDropdownFunction() {
 			}
 			the.setQuery = setQuery;
 
-			//console.log("OLD QUERY:", the.oldQuery);
+			//the.verbose("OLD QUERY:", the.oldQuery);
 			getQuery();
-			//console.log("KEY QUERY:", the.query);
+			//the.verbose("KEY QUERY:", the.query);
 			setQuery();
-			//console.log("NEW QUERY:", the.newQuery);
+			//the.verbose("NEW QUERY:", the.newQuery);
 
 			Object.assign(the, {
 				//the = { // Data structure local to this instance
@@ -135,6 +135,13 @@ function noiseDropdownFunction() {
 				margin  : 0.9,         // Fit visualization to window
 				lattice : [],          // linear array of node objects
 				carrier : [],
+				follow  : false,
+
+				verbose: function() {
+					if (the.follow) {
+						console.log("   (verbose) ", arguments);
+					}
+				},
 
 				clear: function(update = false) {
 					for(var i=the.lattice.length; i-- > 0;) {
@@ -162,7 +169,7 @@ function noiseDropdownFunction() {
 
 				irgba: function(rgba) {
 					if (rgba.i === undefined) {
-						console.log("irgba: MISSING INDEX!");
+						the.verbose("irgba: MISSING INDEX!");
 						return;
 					}
 					var node     = the.lattice[rgba.i];
@@ -201,7 +208,8 @@ function noiseDropdownFunction() {
 				},
 
 				init: function(parms) {
-					if (parms.verbose == true) console.log("INIT:", parms);
+					the.follow = parms.verbose;
+					the.verbose("INIT:", parms);
 					var flat;
 					var xyz;
 					switch(parms.normal) {
@@ -219,13 +227,13 @@ function noiseDropdownFunction() {
 							Math.trunc(scale * node.position.y),
 							Math.trunc(scale * node.position.z),
 						];
-						//console.log("USE:", parms.fun);
+						//the.verbose("USE:", parms.fun);
 						if (parms.scrimmage[parms.fun](
 							xyz, rgba, parms.offset, parms.radius, parms.sigma,
 							scale, parms.normal, flat))
 						{
 							rgba.i = i;
-							//console.log("RGBA:", rgba);
+							//the.verbose("RGBA:", rgba);
 							parms.scrimmage.irgba(rgba);
 						}
 					}
@@ -233,7 +241,7 @@ function noiseDropdownFunction() {
 				},
 
 				line: function(parms) {
-					console.log("LINE:", parms);
+					the.verbose("LINE:", parms);
 					var rgba = parms.rgba;
 					var x0 = parms.xyz[0][0]
 					var y0 = parms.xyz[0][1]
@@ -257,6 +265,7 @@ function noiseDropdownFunction() {
 				},
 
 				trail: function(pen, xyz, rgba) {
+					// TODO add sign * 0.5 to each increment
 					if (pen) {
 						var irgba = {};
 						var xyzn = [~~(xyz[0]), ~~(xyz[1]), ~~(xyz[2])];
@@ -264,12 +273,24 @@ function noiseDropdownFunction() {
 						irgba.i = the.xyz2i(xyzn);
 						the.irgba(irgba);
 					}
-					console.log("TRAIL:", pen, xyzn, irgba);
+					//the.verbose("TRAIL:", pen, xyzn, irgba);
+				},
+
+				march: function(pen, count, xyz, ijk, rgba) {
+					if (pen) {
+						count += !count;
+						the.verbose("MARCH:", count, ijk);
+						while (count-- > 0) {
+							xyz = [xyz[0]+ijk[0],xyz[1]+ijk[1],xyz[2]+ijk[2]];
+							the.trail(pen, xyz, rgba);
+						}
+					}
+					return xyz;
 				},
 
 				turtle: function(stream) {
-					console.log("STREAM["+stream+']');
-					//var count = 0;
+					the.verbose("STREAM["+stream+']');
+					var count = 0;
 					var pen = false;
 					var xyz = [0,0,0];
 					var ijk = [1,0,0];
@@ -281,81 +302,88 @@ function noiseDropdownFunction() {
 						"^\\[" + VALUE + "," + VALUE + "," + VALUE + "\\]");
 					var BRACK = new RegExp(
 						"^\\{" + VALUE + "," + VALUE + "," + VALUE + "," + VALUE + "\\}");
-					var LEGAL = /^([F \*]*)/;
+					var LEGAL =  new RegExp("^([0-9F \*]+)");
 					var result = null;
 					do {
-						//if (++count > 10) {
-							//console.log("TOO MANY:", stream);
-							//break;
-						//}
 						result = stream.match(PAREN);
 						if (result) {
-							console.log("PAREN: ("+result[1]+")", result);
+							the.verbose("PAREN: ("+result[1]+")", result);
 							stream = stream.substr(result[0].length);
 							xyz[0] = Number(result[1]);
 							xyz[1] = Number(result[2]);
 							xyz[2] = Number(result[3]);
-							console.log("XYZ:", xyz, result);
+							the.verbose("XYZ:", xyz, result);
 							continue;
 						}
 						result = stream.match(BRACE);
 						if (result) {
-							console.log("BRACE: ["+result[1]+"]", result);
+							the.verbose("BRACE: ["+result[1]+"]", result);
 							stream = stream.substr(result[0].length);
-							ijk[0] = parseFloat(result[1]);
-							ijk[1] = parseFloat(result[2]);
-							ijk[2] = parseFloat(result[3]);
+							ijk[0] = Number(result[1]);
+							ijk[1] = Number(result[2]);
+							ijk[2] = Number(result[3]);
 							var norm = Math.sqrt(ijk[0]**2 + ijk[1]**2 + ijk[2]**2);
 							if (norm == 0) { error("Vector length 0"); break; }
 							ijk[0] /= norm;
 							ijk[1] /= norm;
 							ijk[2] /= norm;
-							console.log("IJK:", ijk, result);
+							the.verbose("IJK:", ijk, result);
 							continue;
 						}
 						result = stream.match(BRACK);
 						if (result) {
-							console.log("BRACK: {"+result[1]+"}", result);
+							the.verbose("BRACK: {"+result[1]+"}", result);
 							stream = stream.substr(result[0].length);
 							rgba.r = Number(result[1]);
 							rgba.g = Number(result[2]);
 							rgba.b = Number(result[3]);
 							rgba.a = Number(result[4]);
-							console.log("RGBA:", rgba, result);
+							the.verbose("RGBA:", rgba, result);
 							continue;
 						}
+						//the.verbose("STR:", stream);
 						result = stream.match(LEGAL);
+						//the.verbose("RES:", result);
 						if (result) {
-							console.log("LEGAL: '"+result[1]+"'", result);
+							//the.verbose("LEGAL: '"+result[1]+"'", result);
 							stream = stream.substr(result[0].length);
-							var chs = result[0];
+							var chs = result[1];
 							var I   = chs.length;
 							for (var i=0; i < I; ++i) {
 								var ch = chs[i];
 								switch(ch) {
+									case '0':
+									case '1': case '2': case '3':
+									case '4': case '5': case '6':
+									case '7': case '8': case '9':
+										count = count * 10 + Number(ch);
+										the.verbose("COUNT N:", count);
+										break;
 									case ' ':
-										console.log("UP");
+										//the.verbose("UP");
 										pen = false;
+										count = 0;
 										break; // pen up
 									case '*':
-										console.log("DN");
+										//the.verbose("DN");
 										pen =  true;
 										the.trail(pen, xyz, rgba);
+										count = 0;
 										break;
 									case 'F': // forward
-										console.log("FORWARD");
-										xyz = [xyz[0]+ijk[0],xyz[1]+ijk[1],xyz[2]+ijk[2]];
-										the.trail(pen, xyz, rgba);
+										//the.verbose("FORWARD");
+										xyz = the.march(pen, count, xyz, ijk, rgba);
+										count = 0;
 										break;
 									default:
-										console.log("INVALID T '"+ch+"'");
+										the.verbose("INVALID T '"+ch+"'");
 										return;
 										break;
 								}
 							}
 							continue;
 						}
-						console.log("ILLEGAL: '"+stream+"'");
+						the.verbose("ILLEGAL: '"+stream+"'");
 						break;
 					} while (stream.length > 0); //result != null);
 				}
@@ -376,7 +404,7 @@ function noiseDropdownFunction() {
 					var r = Math.trunc(Math.sqrt(x**2 + y**2) + 0.5);
 					var upper = radius + sigma, lower = radius - sigma;
 					var ret = (r <= upper && r >= lower);
-					//console.log("RET:", ret, radius, sigma);
+					//the.verbose("RET:", ret, radius, sigma);
 					return ret;
 				},
 
@@ -412,7 +440,7 @@ function noiseDropdownFunction() {
 			};
 			Object.assign(the, shapes);
 			the.shapes = Object.keys(shapes);
-			//console.log("SHAPES:", the.shapes);
+			//the.verbose("SHAPES:", the.shapes);
 
 			// Radial axial node count of nodes beyond ctr
 			//the.RX = the.query.RX;
@@ -515,7 +543,7 @@ function noiseDropdownFunction() {
 
 
 			// Observe node at (0,0,0) and make access simpler
-			//console.log("NODE(0,0,0):", lattice[iCenter]);
+			//the.verbose("NODE(0,0,0):", lattice[iCenter]);
 
 			/*
 				// Change the node size
@@ -547,7 +575,7 @@ function noiseDropdownFunction() {
 
 			// UNIT TESTS UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
 			the.unitTest = function() {
-				console.log("UNIT TESTS");
+				the.verbose("UNIT TESTS");
 
 				// Compare lists
 				var listsEqual = function(a, b) {
@@ -561,7 +589,7 @@ function noiseDropdownFunction() {
 				var test = function(unit, result, title) {
 					const msg = ["[FAIL]", "[PASS]"];
 					var PF = msg[~~result];
-					console.log("UNIT(", unit, "): ", PF, result, title);
+					the.verbose("UNIT(", unit, "): ", PF, result, title);
 				}
 
 				// 11111111111111111111111111111111111111111111111111111111111111

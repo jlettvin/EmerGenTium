@@ -196,11 +196,11 @@
 				"(0,0,0)" +            // Where to start (implies ' ')
 				"[1,0,0]" +            // Which direction to go
 				"{0,0,0,1}" +          // What color/opacity to use
-				"*FFF" +               // Turtle commands
-				"{1,0,0,1}[+0,+1,+0]FFF" +  // red
-				"{0,1,0,1}[-1,+0,+0]FFFF" +  // green
-				"{0,0,1,1}[+0,-1,+0]FFFF" +  // blue
-				"{1,1,0,1}[+0,+0,+1]FFFFF" +  // yellow
+				"*2F" +               // Turtle commands
+				"{1,0,0,1}[+0,+1,+0]3F" +  // red
+				"{0,1,0,1}[-1,+0,+0]4F" +  // green
+				"{0,0,1,1}[+0,-1,+0]5F" +  // blue
+				"{1,1,0,1}[+0,+0,+1]6F" +  // yellow
 
 				//"{0,0,1,1}" +
 				//"[0,0,1]" +
