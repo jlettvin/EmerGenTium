@@ -268,111 +268,97 @@ function noiseDropdownFunction() {
 				},
 
 				turtle: function(stream) {
-					var res;
+					console.log("STREAM["+stream+']');
+					//var count = 0;
 					var pen = false;
-					var i = 0, I = stream.length;
-					var ch;
 					var xyz = [0,0,0];
 					var ijk = [1,0,0];
-					var mno = [1,0,0];
 					var rgba = {r:0, g:0, b:0, a:0};
-					var error = function(msg) { console.log("ERROR:", msg); }
-					// Where to start
-					var XYZ = /\(([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*)\)/;
-					// Which direction to go
-					var IJK = /\[([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*)\]/;
-					// Which way is "UP"
-					var MNO = /\<([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*),([-+]?[0-9]+\.?[0-9]*)\>/;
-					// What color/opacity to use
-					var RGBA = /\{([0-9]+\.?[0-9]*),([0-9]+\.?[0-9]*),([0-9]+\.?[0-9]*),([0-9]+\.?[0-9]*)\}/;
-					while (stream.length) {
-						console.log("STREAM:", stream);
-
-						// Jump to coordinates (x,y,z)
-						res = XYZ.exec(stream);
-						if (res && res.length == 4) {
-							xyz[0] = Number(res[1]);
-							xyz[1] = Number(res[2]);
-							xyz[2] = Number(res[3]);
-							stream = stream.substr(res[0].length);
-							console.log("XYZ:", xyz, stream, res);
+					var VALUE = "([-+]?[0-9]+\.?[0-9]*)";
+					var PAREN = new RegExp(
+						"^\\(" + VALUE + "," + VALUE + "," + VALUE + "\\)");
+					var BRACE = new RegExp(
+						"^\\[" + VALUE + "," + VALUE + "," + VALUE + "\\]");
+					var BRACK = new RegExp(
+						"^\\{" + VALUE + "," + VALUE + "," + VALUE + "," + VALUE + "\\}");
+					var LEGAL = /^([F \*]*)/;
+					var result = null;
+					do {
+						//if (++count > 10) {
+							//console.log("TOO MANY:", stream);
+							//break;
+						//}
+						result = stream.match(PAREN);
+						if (result) {
+							console.log("PAREN: ("+result[1]+")", result);
+							stream = stream.substr(result[0].length);
+							xyz[0] = Number(result[1]);
+							xyz[1] = Number(result[2]);
+							xyz[2] = Number(result[3]);
+							console.log("XYZ:", xyz, result);
 							continue;
 						}
-
-						// Set direction to (i,j,k)
-						res = IJK.exec(stream);
-						if (res && res.length == 4) {
-							ijk[0] = parseFloat(res[1]);
-							ijk[1] = parseFloat(res[2]);
-							ijk[2] = parseFloat(res[3]);
+						result = stream.match(BRACE);
+						if (result) {
+							console.log("BRACE: ["+result[1]+"]", result);
+							stream = stream.substr(result[0].length);
+							ijk[0] = parseFloat(result[1]);
+							ijk[1] = parseFloat(result[2]);
+							ijk[2] = parseFloat(result[3]);
 							var norm = Math.sqrt(ijk[0]**2 + ijk[1]**2 + ijk[2]**2);
 							if (norm == 0) { error("Vector length 0"); break; }
 							ijk[0] /= norm;
 							ijk[1] /= norm;
 							ijk[2] /= norm;
-							stream = stream.substr(res[0].length);
-							console.log("IJK:", ijk, stream, res);
+							console.log("IJK:", ijk, result);
 							continue;
 						}
-
-						// Set head "up" to <m,n,o>
-						res = MNO.exec(stream);
-						if (res && res.length == 4) {
-							mno[0] = parseFloat(res[1]);
-							mno[1] = parseFloat(res[2]);
-							mno[2] = parseFloat(res[3]);
-							var norm = Math.sqrt(mno[0]**2 + mno[1]**2 + mno[2]**2);
-							if (norm == 0) { error("Vector length 0"); break; }
-							mno[0] /= norm;
-							mno[1] /= norm;
-							mno[2] /= norm;
-							stream = stream.substr(res[0].length);
-							console.log("MNO:", mno, stream, res);
+						result = stream.match(BRACK);
+						if (result) {
+							console.log("BRACK: {"+result[1]+"}", result);
+							stream = stream.substr(result[0].length);
+							rgba.r = Number(result[1]);
+							rgba.g = Number(result[2]);
+							rgba.b = Number(result[3]);
+							rgba.a = Number(result[4]);
+							console.log("RGBA:", rgba, result);
 							continue;
 						}
-
-						// Set color to {r,g,b,a}
-						res = RGBA.exec(stream);
-						if (res && res.length == 5) {
-							rgba.r = Number(res[1]);
-							rgba.g = Number(res[2]);
-							rgba.b = Number(res[3]);
-							rgba.a = Number(res[4]);
-							stream = stream.substr(res[0].length);
-							console.log("RGBA:", rgba, stream, res);
+						result = stream.match(LEGAL);
+						if (result) {
+							console.log("LEGAL: '"+result[1]+"'", result);
+							stream = stream.substr(result[0].length);
+							var chs = result[0];
+							var I   = chs.length;
+							for (var i=0; i < I; ++i) {
+								var ch = chs[i];
+								switch(ch) {
+									case ' ':
+										console.log("UP");
+										pen = false;
+										break; // pen up
+									case '*':
+										console.log("DN");
+										pen =  true;
+										the.trail(pen, xyz, rgba);
+										break;
+									case 'F': // forward
+										console.log("FORWARD");
+										xyz = [xyz[0]+ijk[0],xyz[1]+ijk[1],xyz[2]+ijk[2]];
+										the.trail(pen, xyz, rgba);
+										break;
+									default:
+										console.log("INVALID T '"+ch+"'");
+										return;
+										break;
+								}
+							}
 							continue;
 						}
-
-						ch = stream[0];
-						stream = stream.substr(1);
-
-						switch(ch) {
-							case ' ':
-								pen = false;
-								break; // pen up
-							case '*':
-								pen =  true;
-								the.trail(pen, xyz, rgba);
-								break;
-							case 'F': // forward
-								xyz = [xyz[0]+ijk[0],xyz[1]+ijk[1],xyz[2]+ijk[2]];
-								the.trail(pen, xyz, rgba);
-								break;
-							case 'L': // left
-							case 'R': // right
-							case 'U': // up
-							case 'D': // down
-								console.log("TURTLE UNIMPLEMENTED:", ch);
-								break;
-							default:
-								error("INVALID T '"+ch+"'");
-								return;
-								break;
-						}
-
-						continue;
-					}
-				},
+						console.log("ILLEGAL: '"+stream+"'");
+						break;
+					} while (stream.length > 0); //result != null);
+				}
 			});
 
 			var shapes = {
@@ -593,13 +579,12 @@ function noiseDropdownFunction() {
 					the.turtle(
 						"(5,5,5)" +            // Where to start (implies ' ')
 						"[1,2,3]" +            // Which direction to go
-						"<2,2,2>" +            // Which way is up
 						"{0,0,0,1}" +          // What color/opacity to use
-						"*FLURD "              // Turtle commands
+						"*F "                  // Turtle commands
 					);
 				}
 
-				var units = [unit1, unit2];     // List of tests
+				var units = [unit1]; //, unit2];     // List of tests
 
 				for(var unit of units) unit();  // Execute tests in list
 			}

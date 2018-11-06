@@ -193,11 +193,22 @@
 
 		function turtle() {
 			the.turtle(
-				"(5,5,5)" +            // Where to start (implies ' ')
+				"(0,0,0)" +            // Where to start (implies ' ')
 				"[1,0,0]" +            // Which direction to go
-				"<2,2,2>" +            // Which way is up
 				"{0,0,0,1}" +          // What color/opacity to use
-				"*FFFFFLURD "              // Turtle commands
+				"*FFF" +               // Turtle commands
+				"{1,0,0,1}[+0,+1,+0]FFF" +  // red
+				"{0,1,0,1}[-1,+0,+0]FFFF" +  // green
+				"{0,0,1,1}[+0,-1,+0]FFFF" +  // blue
+				"{1,1,0,1}[+0,+0,+1]FFFFF" +  // yellow
+
+				//"{0,0,1,1}" +
+				//"[0,0,1]" +
+				//"FFF" +             // Turtle commands
+				//"{1,0,0,1}" +
+				//"[-1,0,0]" +
+				//"FFF" +             // Turtle commands
+				" "
 			);
 			the.update();
 		}
