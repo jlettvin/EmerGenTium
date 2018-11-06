@@ -269,13 +269,16 @@ function noiseDropdownFunction() {
 					// TODO add sign * 0.5 to each increment
 					if (pen) {
 						var irgba = {};
-						// round away from 0
-						var x = xyz[0]; x += (x < 0) ? -0.5 : +0.5;
-						var y = xyz[1]; y += (y < 0) ? -0.5 : +0.5;
-						var z = xyz[2]; z += (z < 0) ? -0.5 : +0.5;
-						var xyzn = [~~x, ~~y, ~~z];
+						// Round with care and limit to maximum radius
+						var x = xyz[0], y = xyz[1], z = xyz[2];
+						var sx = -1+2*+(x>=0), sy = -1+2*+(y>=0), sz = -1+2*+(z>=0);
+						x = ~~(x+sx*0.5); y = ~~(y+sy*0.5); z = ~~(z+sz*0.5);
+						if (Math.abs(x) > the.query.RX) x = sx * the.query.RX;
+						if (Math.abs(y) > the.query.RY) y = sy * the.query.RY;
+						if (Math.abs(z) > the.query.RZ) z = sz * the.query.RZ;
+
 						Object.assign(irgba, rgba);
-						irgba.i = the.xyz2i(xyzn);
+						irgba.i = the.xyz2i([x,y,z]);
 						the.irgba(irgba);
 					}
 					//the.verbose("TRAIL:", pen, xyzn, irgba);
