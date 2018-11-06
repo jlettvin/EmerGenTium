@@ -62,6 +62,7 @@ function noiseDropdownFunction() {
 
 	// Handle hotkeys
 	function keyup(evt) {
+		// TODO restore camera angle with 'Digit0'
 		var the = document.jlettvin.scrimmage.the;
 
 		the.verbose(evt);
