@@ -369,18 +369,18 @@ function noiseDropdownFunction() {
 										the.verbose("COUNT N:", count);
 										break;
 									case ' ':
-										//the.verbose("UP");
+										the.verbose("UP");
 										pen = false;
 										count = 0;
 										break; // pen up
 									case '*':
-										//the.verbose("DN");
+										the.verbose("DN");
 										pen =  true;
 										the.pixel(pen, xyz, rgba);
 										count = 0;
 										break;
 									case 'F': // forward
-										//the.verbose("FORWARD");
+										the.verbose("FORWARD");
 										xyz = the.march(pen, count, xyz, ijk, rgba);
 										count = 0;
 										break;
@@ -417,7 +417,7 @@ function noiseDropdownFunction() {
 					var r = Math.trunc(Math.sqrt(x**2 + y**2) + 0.5);
 					var upper = radius + sigma, lower = radius - sigma;
 					var ret = (r <= upper && r >= lower);
-					//the.verbose("RET:", ret, radius, sigma);
+					the.verbose("RET:", ret, radius, sigma);
 					return ret;
 				},
 

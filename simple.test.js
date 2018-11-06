@@ -108,7 +108,6 @@
 
 	// Run the builtin unit tests
 	the.unitTest();
-	the.noise();
 
 	// Simplify access to scrimmage shape function
 	var init = the.init;
@@ -126,6 +125,8 @@
 	function update(vals) { Object.assign(parms, vals); return parms; }
 	//console.log("CHOOSE KEY:", key);
 	function main() {
+
+		the.noise();
 
 		var RX = the.query.RX;
 		var RY = the.query.RX;
@@ -201,7 +202,7 @@
 				"{0,1,0,1}[-1,+0,+0]4F" +  // green
 				"{0,0,1,1}[+0,-1,+0]5F" +  // blue
 				"{1,1,0,1}[+0,+0,+1]6F" +  // yellow
-				"{1,1,1,1}[+2,+8,-7]9F" +  // yellow
+				"{1,1,1,1}[-5,+8,-7]9F" +  // yellow
 				"(-10,10,10)[1,-1,0]{0,1,1,1}*21F" +
 				" "
 			);
