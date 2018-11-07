@@ -1,6 +1,11 @@
 "use strict";
 
 (function(doc,win) {
+	// TODO implement circle and other 2D figures.
+	// TODO add extents and (x0,y0,z0) for displacing 3D figures.
+
+
+
 	// Construct a scrimmage
 	// By default, set a small radius (10) for a cube edge of 21 voxels.
 	// If the querystring contains values for RX, RY, and RZ
