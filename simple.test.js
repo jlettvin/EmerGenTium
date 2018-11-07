@@ -204,17 +204,17 @@
 		// MENU function
 		function turtle1() {
 			the.turtle(
-				"center" +                         // Where to start (implies ' ')
+				" center" +                         // Where to start (implies ' ')
 				"[1,0,0]" +                        // Which direction to go
 				"{0,0,0,1}" +                      // What color/opacity to use
 				"v2F" +
-				"red[0,1,0]3F" +                   // color names can be used
-				"green[-1,0,0]4F" +
-				"blue[0,-1,0]5F" +
-				"yellow[0,0,1]6F" +
-				"white[1,-7,-9]100F" +
-				"^dswv[1,-1,0]cyanv10F" +
-				"une[-1,1,0]magenta10F" +
+				"red [0,1,0]3F" +                   // color names can be used
+				"green [-1,0,0]4F" +
+				"blue [0,-1,0]5F" +
+				"yellow [0,0,1]6F" +
+				"white [1,-7,-9]100F" +
+				"^dswv[1,-1,0] cyan v10F" +
+				"une[-1,1,0] magenta 10F" +
 				"^"
 			);
 			the.update();

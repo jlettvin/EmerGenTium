@@ -317,6 +317,7 @@ function noiseDropdownFunction() {
 					var ijk = [1,0,0];
 					var rgba = {r:0, g:0, b:0, a:0};
 					var VALUE = "([-+]?[0-9]+\.?[0-9]*)";
+					var SPACE = new RegExp("^\\s*");
 					var PAREN = new RegExp(
 						"^\\(" + VALUE + "," + VALUE + "," + VALUE + "\\)");
 					var BRACE = new RegExp(
@@ -328,6 +329,16 @@ function noiseDropdownFunction() {
 					var LEGAL = new RegExp("^([0-9AXYZFv^]+)");
 					var result = null;
 					do {
+						if (stream[0] == ' ') {
+							stream = stream.substr(1);
+							continue;
+						}
+						//result = stream.match(SPACE);
+						//if (result) {
+							//the.verbose("SPACE:");
+							//stream = stream.substr(result[0].length);
+							//continue;
+						//}
 						result = stream.match(PAREN);
 						if (result) {
 							var xyz0 = [~~xyz[0], ~~xyz[1], ~~xyz[2]];
