@@ -91,6 +91,7 @@ function noiseDropdownFunction() {
 
 			var the = {query: {NOISE: 0.1}};
 
+			// Parse and use the querystring to adjust runtime parameters.
 			the.oldQuery = location.search.slice.length && location.search.slice(1);
 			function getQuery() { // Extract query dictionary from query string
 				//the.verbose("GETQUERY:", the.query);
@@ -242,8 +243,8 @@ function noiseDropdownFunction() {
 					the.update();
 				},
 
-				line: function(parms) {
-					the.verbose("LINE:", parms);
+				drawLine: function(parms) {
+					the.verbose("LINE (Bresenhan):", parms);
 					var rgba = parms.rgba;
 					var x0 = parms.xyz[0][0]
 					var y0 = parms.xyz[0][1]
@@ -251,6 +252,13 @@ function noiseDropdownFunction() {
 					var x1 = parms.xyz[1][0]
 					var y1 = parms.xyz[1][1]
 					var z1 = parms.xyz[1][2]
+					var RX = the.query.RX, RY = the.query.RY, RZ = the.query.RZ;
+					if (-RX > x0 || x0 > RX) { x0 = (x0 < 0) ? -RX : RX; }
+					if (-RX > x1 || x1 > RX) { x1 = (x1 < 0) ? -RX : RX; }
+					if (-RY > y0 || y0 > RY) { y0 = (y0 < 0) ? -RY : RY; }
+					if (-RY > y1 || y1 > RY) { y1 = (y1 < 0) ? -RY : RY; }
+					if (-RZ > z0 || z0 > RZ) { z0 = (z0 < 0) ? -RZ : RZ; }
+					if (-RZ > z1 || z1 > RZ) { z1 = (z1 < 0) ? -RZ : RZ; }
 					var dx = Math.abs(x1-x0), sx = x0<x1 ? 1 : -1;
 					var dy = Math.abs(y1-y0), sy = y0<y1 ? 1 : -1;
 					var dz = Math.abs(z1-z0), sz = z0<z1 ? 1 : -1;
@@ -266,7 +274,7 @@ function noiseDropdownFunction() {
 					}
 				},
 
-				pixel: function(pen, xyz, rgba) {
+				drawPixel: function(pen, xyz, rgba) {
 					// TODO add sign * 0.5 to each increment
 					if (pen) {
 						var irgba = {};
@@ -295,7 +303,7 @@ function noiseDropdownFunction() {
 								xyz[1]+ijk[1],
 								xyz[2]+ijk[2]
 							];
-							the.pixel(pen, xyz, rgba);
+							the.drawPixel(pen, xyz, rgba);
 						}
 					}
 					return xyz;
@@ -315,16 +323,23 @@ function noiseDropdownFunction() {
 						"^\\[" + VALUE + "," + VALUE + "," + VALUE + "\\]");
 					var BRACK = new RegExp(
 						"^\\{" + VALUE + "," + VALUE + "," + VALUE + "," + VALUE + "\\}");
-					var LEGAL =  new RegExp("^([0-9AXYZF \*]+)");
+					var COLOR = new RegExp("^(black|gray|white|red|green|blue|yellow|cyan|magenta)");
+					var COORD = new RegExp("^(center|unw|une|usw|use|dnw|dne|dsw|dse)");
+					var LEGAL = new RegExp("^([0-9AXYZFv^]+)");
 					var result = null;
 					do {
 						result = stream.match(PAREN);
 						if (result) {
+							var xyz0 = [~~xyz[0], ~~xyz[1], ~~xyz[2]];
 							the.verbose("PAREN: ("+result[1]+")", result);
 							stream = stream.substr(result[0].length);
-							xyz[0] = Number(result[1]);
-							xyz[1] = Number(result[2]);
-							xyz[2] = Number(result[3]);
+							xyz[0] = ~~Number(result[1]);
+							xyz[1] = ~~Number(result[2]);
+							xyz[2] = ~~Number(result[3]);
+							if ((xyz0 != xyz) && pen) {
+								the.verbose("CONNECT:", xyz0, xyz);
+								the.drawLine({xyz: [xyz0, xyz], rgba: rgba});
+							}
 							the.verbose("XYZ:", xyz, result);
 							continue;
 						}
@@ -354,6 +369,98 @@ function noiseDropdownFunction() {
 							the.verbose("RGBA:", rgba, result);
 							continue;
 						}
+
+						result = stream.match(COLOR);
+						//the.verbose("COLOR: ["+result[1]+"]", result);
+						if (result) {
+							var key = result[1];
+							stream = stream.substr(result[0].length);
+							switch(key) {
+								case 'black':
+									Object.assign(rgba, {r:0,g:0,b:0,a:1});
+									break;
+								case 'gray':
+									Object.assign(rgba, {r:0.5,g:0.5,b:0.5,a:1});
+									break;
+								case 'white':
+									Object.assign(rgba, {r:1,g:1,b:1,a:1});
+									break;
+								case 'red':
+									Object.assign(rgba, {r:1,g:0,b:0,a:1});
+									break;
+								case 'green':
+									Object.assign(rgba, {r:0,g:1,b:0,a:1});
+									break;
+								case 'blue':
+									Object.assign(rgba, {r:0,g:0,b:1,a:1});
+									break;
+								case 'yellow':
+									Object.assign(rgba, {r:1,g:1,b:0,a:1});
+									break;
+								case 'cyan':
+									Object.assign(rgba, {r:0,g:1,b:1,a:1});
+									break;
+								case 'magenta':
+									Object.assign(rgba, {r:1,g:0,b:1,a:1});
+									break;
+								default:
+										the.verbose("INVALID TURTLE C '"+key+"'");
+										return;
+										break;
+							}
+							continue;
+						}
+
+						result = stream.match(COORD);
+						if (result) {
+							var xyz0 = [~~xyz[0], ~~xyz[1], ~~xyz[2]];
+							var key = result[1];
+							var __ = 0;
+							var PX = the.query.RX, NX = -the.query.RX;
+							var PY = the.query.RY, NY = -the.query.RY;
+							var PZ = the.query.RZ, NZ = -the.query.RZ;
+							stream = stream.substr(result[0].length);
+							switch(key) {
+								case 'center':
+									xyz = [__,__,__];
+									break;
+								case 'unw':
+									xyz = [NX,NY,NZ];
+									break;
+								case 'une':
+									xyz = [PX,NY,NZ];
+									break;
+								case 'usw':
+									xyz = [NX,PY,NZ];
+									break;
+								case 'use':
+									xyz = [PX,PY,NZ];
+									break;
+								case 'dnw':
+									xyz = [NX,NY,PZ];
+									break;
+								case 'dne':
+									xyz = [PX,NY,PZ];
+									break;
+								case 'dsw':
+									xyz = [NX,PY,PZ];
+									break;
+								case 'dse':
+									xyz = [PX,PY,PZ];
+									break;
+								default:
+										the.verbose("INVALID TURTLE XYZ '"+key+"'");
+										return;
+										break;
+							}
+							if ((xyz0 != xyz) && pen) {
+								the.verbose("CONNECT:", xyz0, xyz);
+								the.drawLine({xyz: [xyz0, xyz], rgba: rgba});
+							}
+							//the.verbose("XYZ:", xyz, result);
+							continue;
+						}
+
 						//the.verbose("STR:", stream);
 						result = stream.match(LEGAL);
 						//the.verbose("RES:", result);
@@ -372,15 +479,15 @@ function noiseDropdownFunction() {
 										count = count * 10 + Number(ch);
 										the.verbose("COUNT N:", count);
 										break;
-									case ' ':
+									case '^':
 										the.verbose("UP");
 										pen = false;
 										count = 0;
 										break; // pen up
-									case '*':
+									case 'v':
 										the.verbose("DN");
 										pen =  true;
-										the.pixel(pen, xyz, rgba);
+										the.drawPixel(pen, xyz, rgba);
 										count = 0;
 										break;
 									case 'F': // forward
@@ -393,7 +500,7 @@ function noiseDropdownFunction() {
 									case 'Y': alongY(); count = 0; break;
 									case 'Z': alongZ(); count = 0; break;
 									default:
-										the.verbose("INVALID T '"+ch+"'");
+										the.verbose("INVALID TURTLE T '"+ch+"'");
 										return;
 										break;
 								}
@@ -625,7 +732,7 @@ function noiseDropdownFunction() {
 						"(5,5,5)" +            // Where to start (implies ' ')
 						"[1,2,3]" +            // Which direction to go
 						"{0,0,0,1}" +          // What color/opacity to use
-						"*F "                  // Turtle commands
+						"vF "                  // Turtle commands
 					);
 				}
 

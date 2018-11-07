@@ -2,13 +2,21 @@
 
 (function(doc,win) {
 	// Construct a scrimmage
+	// By default, set a small radius (10) for a cube edge of 21 voxels.
+	// If the querystring contains values for RX, RY, and RZ
+	// these will be substituted before creating the lattice.
+	// If create is called and the querystring is empty
+	// then the values specified here get used as a default.
+	// Client programs need not have a query string, but just shape it like this.
 	var radius = 10;
 	var the = document.jlettvin.scrimmage.create({x:radius, y:radius, z:radius});
 
-	// Gain access to the data shapes
+	// Gain access to the implemented simple data shapes
 	var shapeChoices = the.shapes;
 
-	// Add some test names not in the shapes list
+	// Shape functions in simple.js include simple shapes.
+	// Combined shapes can be drawn as a group.
+	// Tests for these are added to the button shapes menu.
 	for (var choice of ['many', 'synchronic', 'lines', 'turtle']) {
 		shapeChoices.push(choice);
 	}
@@ -171,6 +179,7 @@
 			],
 		};
 
+		// MENU function
 		function lines() {
 			var RX = the.query.RX;
 			var RY = the.query.RY;
@@ -184,38 +193,47 @@
 			var xyzg  = [[0,-RY,0], [0,+RY,0]];          // segment ends
 			var xyzb  = [[0,0,-RZ], [0,0,+RZ]];          // segment ends
 
-			the.line({xyz: xyzw, rgba: white});
-			the.line({xyz: xyzr, rgba:   red});
-			the.line({xyz: xyzg, rgba: green});
-			the.line({xyz: xyzb, rgba:  blue});
+			the.drawLine({xyz: xyzw, rgba: white});
+			the.drawLine({xyz: xyzr, rgba:   red});
+			the.drawLine({xyz: xyzg, rgba: green});
+			the.drawLine({xyz: xyzb, rgba:  blue});
 
 			the.update();
 		}
 
-		function turtle() {
+		// MENU function
+		function turtle1() {
 			the.turtle(
-				"(0,0,0)" +                // Where to start (implies ' ')
-				"[1,0,0]" +                // Which direction to go
-				"{0,0,0,1}" +              // What color/opacity to use
-				"*2F" +                    // Turtle commands
-				"{1,0,0,1}[+0,+1,+0]3F" +  // red
-				"{0,1,0,1}[-1,+0,+0]4F" +  // green
-				"{0,0,1,1}[+0,-1,+0]5F" +  // blue
-				"{1,1,0,1}[+0,+0,+1]6F" +  // yellow
-				"{1,1,1,1}[+1,-7,-9]100F" +  // yellow
-				"(-5,5,5)[1,-1,0]{0,1,1,1}*10F" +
-				" "
+				"center" +                         // Where to start (implies ' ')
+				"[1,0,0]" +                        // Which direction to go
+				"{0,0,0,1}" +                      // What color/opacity to use
+				"v2F" +
+				"red[0,1,0]3F" +                   // color names can be used
+				"green[-1,0,0]4F" +
+				"blue[0,-1,0]5F" +
+				"yellow[0,0,1]6F" +
+				"white[1,-7,-9]100F" +
+				"^dswv[1,-1,0]cyanv10F" +
+				"une[-1,1,0]magenta10F" +
+				"^"
+			);
+			the.update();
+		}
+
+		function turtle2() {
+			the.turtle(
+				"(0,0,0)[1,0,0]{0,0,0,1}vF" +
+				"[1,1,0]2F" +
+				"[1,1,1]3F" +
+				"[0,1,0]4F" +
+				"^"
 			);
 			the.update();
 		}
 
 		switch(key) {
-			case 'turtle':
-				turtle();
-				break;
-			case 'lines':
-				lines();
-				break;
+			case 'turtle': turtle1(); break;
+			case 'lines': lines(); break;
 			default:
 				if (shapeChoices.includes(key)) {
 					for (var one of cases[key]) init(update(one));
