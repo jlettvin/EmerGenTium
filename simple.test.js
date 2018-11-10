@@ -3,6 +3,8 @@
 (function(doc,win) {
 	// TODO implement circle and other 2D figures.
 	// TODO add extents and (x0,y0,z0) for displacing 3D figures.
+	// TODO use [i,j,k] normals instead of index for figures
+	// TODO separate shared trackball to control each window independently
 
 
 
@@ -22,7 +24,15 @@
 	// Shape functions in simple.js include simple shapes.
 	// Combined shapes can be drawn as a group.
 	// Tests for these are added to the button shapes menu.
-	for (var choice of ['many', 'synchronic', 'lines', 'turtle']) {
+	for (var choice of [
+		'many',
+		'synchronic',
+		'lines',
+		'turtle',
+		'clutch0',
+		'clutch1',
+		'clutch2',
+	]) {
 		shapeChoices.push(choice);
 	}
 
@@ -148,16 +158,59 @@
 
 		var cases = {
 			many: [
-				{fun: "plane"      , offset: -RZ            , r:0, g: 1, b: 0, normal: 2},
-				{fun: "plane"      , offset:  RZ            , r:0, g: 0, b: 1, normal: 2},
-				{fun: "cylinder"                , radius:  5, r:1, g: 1, b: 0, normal: 2},
-				{fun: "sphere"                  , radius:  7, r:1, g: 0, b: 0},
-				{fun: "paraboloid" , offset:  -9, radius:  7, r:1, g: 1, b: 1, sigma: 1},
+				{fun: "plane"      , offset: -RZ             , r:0, g: 1, b: 0, normal: 2},
+				{fun: "plane"      , offset:  RZ             , r:0, g: 0, b: 1, normal: 2},
+				{fun: "cylinder"                , radius:   5, r:1, g: 1, b: 0, normal: 2},
+				{fun: "sphere"                  , radius:   7, r:1, g: 0, b: 0},
+				{fun: "paraboloid" , offset:  -9, radius:   7, r:1, g: 1, b: 1, sigma: 1},
 			],
 			synchronic: [
-				{fun: "paraboloid" , offset:  -9, radius:  7, r:1, g: 0, b: 0},
-				{fun: "plane"      , offset:   4            , r:0, g: 1, b: 0},
-				{fun: "cylinder"   , offset:   4, radius:  7, r:0, g: 0, b: 1},
+				{fun: "paraboloid" , offset:  -9, radius:   7, r:1, g: 0, b: 0},
+				{fun: "plane"      , offset:   4             , r:0, g: 1, b: 0},
+				{fun: "cylinder"   , offset:   4, radius:   7, r:0, g: 0, b: 1},
+			],
+			disk: [
+				{fun: "disk"       , offset: -1, radius: RXY, r:0, g: 0, b: 0, normal: 2},
+				{fun: "disk"       , offset:  0, radius: RXY, r:1, g: 0, b: 0, normal: 2},
+				{fun: "disk"       , offset:  1, radius: RXY, r:1, g: 1, b: 1, normal: 2},
+			],
+			clutch0: [
+				{fun: "disk"       , offset: -1, radius: RXY, r:0, g: 0, b: 0, normal: 2},
+				{fun: "plane"      , offset: -0             , r:1, g: 0, b: 0, normal: 2},
+				{fun: "disk"       , offset: +1, radius: RXY, r:1, g: 1, b: 1, normal: 2},
+			],
+			clutch1: [
+				{fun: "disk"       , offset: -2, radius: RXY, r:0, g: 0, b: 0, normal: 2},
+				{fun: "plane"      , offset: -1             , r:1, g: 0, b: 0, normal: 2},
+
+				{fun: "plane"      , offset: +1             , r:1, g: 0, b: 0, normal: 2},
+				{fun: "disk"       , offset: +2, radius: RXY, r:1, g: 1, b: 1, normal: 2},
+			],
+			clutch2: [
+				{fun: "disk"       , offset: -3, radius: RXY, r:0, g: 0, b: 0, normal: 2},
+				{fun: "plane"      , offset: -2             , r:1, g: 0, b: 0, normal: 2},
+				{fun: "disk"       , offset: -1, radius: RXY, r:1, g: 1, b: 1, normal: 2},
+
+				{fun: "disk"       , offset: +1, radius: RXY, r:0, g: 0, b: 0, normal: 2},
+				{fun: "plane"      , offset: +2             , r:1, g: 0, b: 0, normal: 2},
+				{fun: "disk"       , offset: +3, radius: RXY, r:1, g: 1, b: 1, normal: 2},
+
+				/*
+				{fun: "cylinder"   , offset:   4, radius:   7, r:1, g: 1, b: 1,
+					normal:
+					[
+						[-the.query.RX, -the.query.RY, -the.query.RZ],
+						[           -4, +the.query.RY, +the.query.RZ],
+					]
+				},
+				{fun: "cylinder"   , offset:   4, radius:   7, r:1, g: 1, b: 1,
+					normal:
+					[
+						[           +4, -the.query.RY, -the.query.RZ],
+						[+the.query.RX, +the.query.RY, +the.query.RZ],
+					]
+				},
+				*/
 			],
 			plane: [
 				{fun: key, offset: -1, r:1, g: 1, b: 1},
@@ -193,15 +246,15 @@
 			var red   = {r:1, g:0, b:0, a:1};            // discardable temp
 			var green = {r:0, g:1, b:0, a:1};            // discardable temp
 			var blue  = {r:0, g:0, b:1, a:1};            // discardable temp
-			var xyzw  = [[-RX,-RY,-RZ], [+RX,+RY,+RZ]];  // segment ends
-			var xyzr  = [[-RX,0,0], [+RX,0,0]];          // segment ends
-			var xyzg  = [[0,-RY,0], [0,+RY,0]];          // segment ends
-			var xyzb  = [[0,0,-RZ], [0,0,+RZ]];          // segment ends
+			var xyzW  = [[-RX,-RY,-RZ,1], [+RX,+RY,+RZ,1]];  // segment ends
+			var xyzR  = [[-RX,0,0,1], [+RX,0,0,1]];          // segment ends
+			var xyzG  = [[0,-RY,0,1], [0,+RY,0,1]];          // segment ends
+			var xyzB  = [[0,0,-RZ,1], [0,0,+RZ,1]];          // segment ends
 
-			the.drawLine({xyz: xyzw, rgba: white});
-			the.drawLine({xyz: xyzr, rgba:   red});
-			the.drawLine({xyz: xyzg, rgba: green});
-			the.drawLine({xyz: xyzb, rgba:  blue});
+			the.drawLine({xyzw: xyzW, rgba: white});
+			the.drawLine({xyzw: xyzR, rgba:   red});
+			the.drawLine({xyzw: xyzG, rgba: green});
+			the.drawLine({xyzw: xyzB, rgba:  blue});
 
 			the.update();
 		}
@@ -209,11 +262,11 @@
 		// MENU function
 		function turtle1() {
 			the.turtle(
-				" center" +                         // Where to start (implies ' ')
-				"[1,0,0]" +                        // Which direction to go
-				"{0,0,0,1}" +                      // What color/opacity to use
+				" center" +                       // Where to start (implies ' ')
+				"[1,0,0]" +                       // Which direction to go
+				"{0,0,0,1}" +                     // What color/opacity to use
 				"v2F" +
-				"red [0,1,0]3F" +                   // color names can be used
+				"red [0,1,0]3F" +                 // color names can be used
 				"green [-1,0,0]4F" +
 				"blue [0,-1,0]5F" +
 				"yellow [0,0,1]6F" +

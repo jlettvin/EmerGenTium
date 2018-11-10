@@ -11,8 +11,23 @@ function noiseDropdownFunction() {
 }
 
 (function(doc,win) {
-	// TODO
-	// isize doesn't work, but perhaps we can do this all with opacity.
+	// TODO isize doesn't work, but perhaps we can do this all with opacity.
+	// TODO implement geometric transformation to project shapes.
+	// TODO use "homogeneous" coordinates with 4 component xyzw vectors.
+	// TODO review "change of coordinates" and "transforming planes".
+	// TODO implement simple shapes as sets of xyzw rather than brute-force.
+	// TODO generate complex shapes using sets of simple shapes.
+	// TODO use string "unit zero" relations to generate shapes.
+	//      (e.g. a simple paraboloid is "sqrt(x**2+y**2)-z").
+	//      Then use geometric transformations to scale, rotate, and translate.
+
+	// TODO for geometric transformation (Three.js, WebGL, new implementation)
+	//      1) implement xyzw vector multiplication with 4x4 matrix
+	//         Three.js has a built-in implementation; see if it can be re-used
+	//      2) implement matrix * matrix multiplication (Three.js again)
+	//      3) implement rotation, translation, scale, 
+	//      3a) make stick figure bones/joints
+	//      3b) consider bones/joints to be arbitrary rotation axes
 
 	// Close the dropdown if the user clicks outside of it
 	win.onclick = function(event) {
@@ -192,29 +207,28 @@ function noiseDropdownFunction() {
 				},
 
 				// Convert coordinates to index
-				xyz2i: function(xyz) {
+				xyzw2i: function(xyzw) {
 					//var the = document.jlettvin.scrimmage;
 					var value = 
-						the.axis[0][xyz[0]+the.query.RX] +
-						the.axis[1][xyz[1]+the.query.RY] +
-						the.axis[2][xyz[2]+the.query.RZ];
+						the.axis[0][xyzw[0]+the.query.RX] +
+						the.axis[1][xyzw[1]+the.query.RY] +
+						the.axis[2][xyzw[2]+the.query.RZ];
 					return (value);
 				},
 
 				// Convert index to coordinates
-				i2xyz: function(i) { // ~~(foo%bar) gives the integer modulus
+				i2xyzw: function(i) { // ~~(foo%bar) gives the integer modulus
 					//var the = document.jlettvin.scrimmage;
 					var x = ~~(i % the.DX) - the.query.RX; i /= the.DX;
 					var y = ~~(i % the.DY) - the.query.RY; i /= the.DY;
 					var z = ~~(i     ) - the.query.RZ;
-					return [x,y,z];
+					return [x,y,z,1];
 				},
 
 				init: function(parms) {
 					the.follow = parms.verbose;
 					the.verbose("INIT:", parms);
 					var flat;
-					var xyz;
 					switch(parms.normal) {
 						case 0: flat = [1,2]; break;
 						case 1: flat = [0,2]; break;
@@ -225,14 +239,15 @@ function noiseDropdownFunction() {
 					for (var i=parms.scrimmage.lattice.length; i-- > 0;) {
 						var node = parms.scrimmage.lattice[i];
 						// Normalize coordinates
-						var xyz = [
+						var xyzw = [
 							Math.trunc(scale * node.position.x),
 							Math.trunc(scale * node.position.y),
 							Math.trunc(scale * node.position.z),
+							1,
 						];
 						//the.verbose("USE:", parms.fun);
 						if (parms.scrimmage[parms.fun](
-							xyz, rgba, parms.offset, parms.radius, parms.sigma,
+							xyzw, rgba, parms.offset, parms.radius, parms.sigma,
 							scale, parms.normal, flat))
 						{
 							rgba.i = i;
@@ -265,7 +280,7 @@ function noiseDropdownFunction() {
 					var dm = Math.max(dx, dy, dz), i = dm;
 					x1 = y1 = z1 = dm/2; // error offset
 					for(;;) {  // loop
-						rgba.i = the.xyz2i([x0, y0, z0]);
+						rgba.i = the.xyzw2i([x0, y0, z0, 1]);
 						the.irgba(rgba);
 						if (i-- == 0) break;
 						x1 -= dx; if (x1 < 0) { x1 += dm; x0 += sx; } 
@@ -274,12 +289,12 @@ function noiseDropdownFunction() {
 					}
 				},
 
-				drawPixel: function(pen, xyz, rgba) {
+				drawPixel: function(pen, xyzw, rgba) {
 					// TODO add sign * 0.5 to each increment
 					if (pen) {
 						var irgba = {};
 						// Round with care and limit to maximum radius
-						var x = xyz[0], y = xyz[1], z = xyz[2];
+						var x = xyzw[0], y = xyzw[1], z = xyzw[2];
 						var sx = -1+2*+(x>=0), sy = -1+2*+(y>=0), sz = -1+2*+(z>=0);
 						x = ~~(x+sx*0.5); y = ~~(y+sy*0.5); z = ~~(z+sz*0.5);
 						if (Math.abs(x) > the.query.RX) x = sx * the.query.RX;
@@ -287,33 +302,34 @@ function noiseDropdownFunction() {
 						if (Math.abs(z) > the.query.RZ) z = sz * the.query.RZ;
 
 						Object.assign(irgba, rgba);
-						irgba.i = the.xyz2i([x,y,z]);
+						irgba.i = the.xyzw2i([x,y,z,1]);
 						the.irgba(irgba);
 					}
-					//the.verbose("TRAIL:", pen, xyzn, irgba);
+					//the.verbose("TRAIL:", pen, xyzw, irgba);
 				},
 
-				march: function(pen, count, xyz, ijk, rgba) {
+				march: function(pen, count, xyzw, ijk, rgba) {
 					if (pen) {
 						count += !count;
 						the.verbose("MARCH:", count, ijk);
 						while (count-- > 0) {
-							xyz = [
+							xyzw = [
 								xyz[0]+ijk[0],
 								xyz[1]+ijk[1],
-								xyz[2]+ijk[2]
+								xyz[2]+ijk[2],
+								1,
 							];
-							the.drawPixel(pen, xyz, rgba);
+							the.drawPixel(pen, xyzw, rgba);
 						}
 					}
-					return xyz;
+					return xyzw;
 				},
 
 				turtle: function(stream) {
 					the.verbose("STREAM["+stream+']');
 					var count = 0;
 					var pen = false;
-					var xyz = [0,0,0];
+					var xyzw = [0,0,0,1];
 					var ijk = [1,0,0];
 					var rgba = {r:0, g:0, b:0, a:0};
 					var VALUE = "([-+]?[0-9]+\.?[0-9]*)";
@@ -341,17 +357,17 @@ function noiseDropdownFunction() {
 						//}
 						result = stream.match(PAREN);
 						if (result) {
-							var xyz0 = [~~xyz[0], ~~xyz[1], ~~xyz[2]];
+							var xyz0 = [~~xyzw[0], ~~xyzw[1], ~~xyzw[2], 1];
 							the.verbose("PAREN: ("+result[1]+")", result);
 							stream = stream.substr(result[0].length);
 							xyz[0] = ~~Number(result[1]);
 							xyz[1] = ~~Number(result[2]);
 							xyz[2] = ~~Number(result[3]);
-							if ((xyz0 != xyz) && pen) {
-								the.verbose("CONNECT:", xyz0, xyz);
-								the.drawLine({xyz: [xyz0, xyz], rgba: rgba});
+							if ((xyz0 != xyzw) && pen) {
+								the.verbose("CONNECT:", xyz0, xyzw);
+								the.drawLine({xyzw: [xyz0, xyzw], rgba: rgba});
 							}
-							the.verbose("XYZ:", xyz, result);
+							the.verbose("XYZ:", xyzw, result);
 							continue;
 						}
 						result = stream.match(BRACE);
@@ -424,7 +440,7 @@ function noiseDropdownFunction() {
 
 						result = stream.match(COORD);
 						if (result) {
-							var xyz0 = [~~xyz[0], ~~xyz[1], ~~xyz[2]];
+							var xyz0 = [~~xyzw[0], ~~xyzw[1], ~~xyzw[2], 1];
 							var key = result[1];
 							var __ = 0;
 							var PX = the.query.RX, NX = -the.query.RX;
@@ -433,42 +449,42 @@ function noiseDropdownFunction() {
 							stream = stream.substr(result[0].length);
 							switch(key) {
 								case 'center':
-									xyz = [__,__,__];
+									xyzw = [__,__,__,1];
 									break;
 								case 'unw':
-									xyz = [NX,NY,NZ];
+									xyzw = [NX,NY,NZ,1];
 									break;
 								case 'une':
-									xyz = [PX,NY,NZ];
+									xyzw = [PX,NY,NZ,1];
 									break;
 								case 'usw':
-									xyz = [NX,PY,NZ];
+									xyzw = [NX,PY,NZ,1];
 									break;
 								case 'use':
-									xyz = [PX,PY,NZ];
+									xyzw = [PX,PY,NZ,1];
 									break;
 								case 'dnw':
-									xyz = [NX,NY,PZ];
+									xyzw = [NX,NY,PZ,1];
 									break;
 								case 'dne':
-									xyz = [PX,NY,PZ];
+									xyzw = [PX,NY,PZ,1];
 									break;
 								case 'dsw':
-									xyz = [NX,PY,PZ];
+									xyzw = [NX,PY,PZ,1];
 									break;
 								case 'dse':
-									xyz = [PX,PY,PZ];
+									xyzw = [PX,PY,PZ,1];
 									break;
 								default:
 										the.verbose("INVALID TURTLE XYZ '"+key+"'");
 										return;
 										break;
 							}
-							if ((xyz0 != xyz) && pen) {
-								the.verbose("CONNECT:", xyz0, xyz);
-								the.drawLine({xyz: [xyz0, xyz], rgba: rgba});
+							if ((xyz0 != xyzw) && pen) {
+								the.verbose("CONNECT:", xyz0, xyzw);
+								the.drawLine({xyzw: [xyz0, xyzw], rgba: rgba});
 							}
-							//the.verbose("XYZ:", xyz, result);
+							//the.verbose("XYZ:", xyzw, result);
 							continue;
 						}
 
@@ -498,12 +514,12 @@ function noiseDropdownFunction() {
 									case 'v':
 										the.verbose("DN");
 										pen =  true;
-										the.drawPixel(pen, xyz, rgba);
+										the.drawPixel(pen, xyzw, rgba);
 										count = 0;
 										break;
 									case 'F': // forward
 										the.verbose("FORWARD");
-										xyz = the.march(pen, count, xyz, ijk, rgba);
+										xyzw = the.march(pen, count, xyzw, ijk, rgba);
 										count = 0;
 										break;
 									case 'A': alongA(); count = 0; break;
@@ -526,43 +542,72 @@ function noiseDropdownFunction() {
 
 			var shapes = {
 
-				plane: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
-					var z = xyz[normal];
+				plane: function(xyzw, rgba, offset, radius, sigma, scale, normal, flat) {
+					var z = xyzw[normal];
 					var upper = offset + sigma, lower = offset - sigma;
 					z = Math.trunc(z);
 					return (z <= upper && z >= lower);
 				},
 
-				cylinder: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
-					var x = xyz[flat[0]];
-					var y = xyz[flat[1]];
+				disk: function(xyzw, rgba, offset, radius, sigma, scale, normal, flat) {
+					var x = xyzw[flat[0]];
+					var y = xyzw[flat[1]];
+					var z = xyzw[normal];
+					var r = Math.sqrt(x**2 + y**2);
+					var upper = offset + sigma, lower = offset - sigma;
+					z = Math.trunc(z);
+					return (z <= upper && z >= lower && r < radius);
+				},
+
+				cylinder: function(xyzw, rgba, offset, radius, sigma, scale, normal, flat) {
+					var x = xyzw[flat[0]];
+					var y = xyzw[flat[1]];
+					var the = doc.jlettvin.scrimmage.the;
+					//console.log("THE", the);
+					var x0 = -the.query.RX, x1 = +the.query.RX;
+					var y0 = -the.query.RY, y1 = +the.query.RY;
+					var z0 = -the.query.RZ, z1 = +the.query.RZ;
 					var r = Math.trunc(Math.sqrt(x**2 + y**2) + 0.5);
+					if (typeof(normal) === "object") {
+						x0 = normal[0][0];
+						y0 = normal[0][1];
+						z0 = normal[0][2];
+						x1 = normal[1][0];
+						y1 = normal[1][1];
+						z1 = normal[1][2];
+					}
 					var upper = radius + sigma, lower = radius - sigma;
-					var ret = (r <= upper && r >= lower);
+					var within = (true
+						&& (x0 <= x && x <= x1)
+						&& (y0 <= y && y <= y1)
+						&& (z0 <= z && z <= z1)
+					);
+					//console.log(within, [x0, y0, z0], [x, y, z], [x1, y1, z1]);
+					var ret = (r <= upper && r >= lower & within);
 					the.verbose("RET:", ret, radius, sigma);
 					return ret;
 				},
 
-				sphere: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
-					var x = xyz[0];
-					var y = xyz[1];
-					var z = xyz[2];
+				sphere: function(xyzw, rgba, offset, radius, sigma, scale, normal, flat) {
+					var x = xyzw[0];
+					var y = xyzw[1];
+					var z = xyzw[2];
 					var r = Math.trunc(Math.sqrt(x**2 + y**2 + z**2) + 0.5);
 					var upper = radius + sigma, lower = radius - sigma;
 					return (r <= upper && r >= lower);
 				},
 
-				paraboloid: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
-					var x = xyz[flat[0]];
-					var y = xyz[flat[1]];
-					var z = xyz[normal];
+				paraboloid: function(xyzw, rgba, offset, radius, sigma, scale, normal, flat) {
+					var x = xyzw[flat[0]];
+					var y = xyzw[flat[1]];
+					var z = xyzw[normal];
 					var r = Math.trunc(offset / 2 + (x**2 + y**2) / radius + 0.5);
 					var upper = z + sigma, lower = z - sigma;
 					return (r <= upper && r >= lower);
 				},
 
-				points: function(xyz, rgba, offset, radius, sigma, scale, normal, flat) {
-					var ret = ((the.xyz2i(xyz) % offset) == 0);
+				points: function(xyzw, rgba, offset, radius, sigma, scale, normal, flat) {
+					var ret = ((the.xyzw2i(xyzw) % offset) == 0);
 					if (ret) {
 						rgba.r = Math.random();
 						rgba.g = Math.random();
@@ -730,8 +775,8 @@ function noiseDropdownFunction() {
 				// 11111111111111111111111111111111111111111111111111111111111111
 				var unit1 = function() {
 					var theCenter = [0,0,0];
-					var iCenter   = the.xyz2i(theCenter);
-					var xyzCenter = the.i2xyz(iCenter);
+					var iCenter   = the.xyzw2i(theCenter);
+					var xyzCenter = the.i2xyzw(iCenter);
 					test( 1,
 						listsEqual(theCenter, xyzCenter),
 						"index <-> [x,y,z] cvt");
