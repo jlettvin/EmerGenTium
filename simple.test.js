@@ -32,6 +32,8 @@
 		'clutch0',
 		'clutch1',
 		'clutch2',
+		'action1',
+		'action2',
 	]) {
 		shapeChoices.push(choice);
 	}
@@ -213,6 +215,16 @@
 					]
 				},
 				*/
+			],
+			action1: [
+				{fun: 'paraboloid', offset: 4-RZ, radius: RZ-4, r:1, g: 1, b: 1, sigma: 1.0},
+				{fun: 'paraboloid', offset: 3-RZ, radius: RZ-5, r:1, g: 0, b: 0, sigma: 1.0},
+				{fun: 'paraboloid', offset: 6-RZ, radius: RZ-6, r:0, g: 0, b: 0, sigma: 1.0},
+			],
+			action2: [
+				{fun: 'paraboloid', offset: 4-RZ, radius: RZ-4, r:1, g: 1, b: 1, sigma: 1.0},
+				{fun: 'paraboloid', offset: 9-RZ, radius: RZ-5, r:1, g: 0, b: 0, sigma: 1.0},
+				{fun: 'paraboloid', offset: 6-RZ, radius: RZ-6, r:0, g: 0, b: 0, sigma: 1.0},
 			],
 			plane: [
 				{fun: key, offset: -1, r:1, g: 1, b: 1},
