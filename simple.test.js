@@ -175,21 +175,23 @@
 				{fun: "disk"       , offset:  1, radius: RXY, r:1, g: 1, b: 1, normal: 2},
 			],
 			clutch0: [
-				{fun: "disk"       , offset: -1, radius: RXY, r:0, g: 0, b: 0, normal: 2},
+				{fun: "disk"       , offset: -1, radius: RXY, r:1, g: 1, b: 1, normal: 2},
 				{fun: "plane"      , offset: -0             , r:1, g: 0, b: 0, normal: 2},
 				{fun: "disk"       , offset: +1, radius: RXY, r:1, g: 1, b: 1, normal: 2},
 			],
 			clutch1: [
-				{fun: "disk"       , offset: -2, radius: RXY, r:0, g: 0, b: 0, normal: 2},
+				{fun: "disk"       , offset: -2, radius: RXY, r:1, g: 1, b: 1, normal: 2},
 				{fun: "plane"      , offset: -1             , r:1, g: 0, b: 0, normal: 2},
+
+				{fun: "disk"       , offset:  0, radius: RXY, r:0, g: 0, b: 0, normal: 2},
 
 				{fun: "plane"      , offset: +1             , r:1, g: 0, b: 0, normal: 2},
 				{fun: "disk"       , offset: +2, radius: RXY, r:1, g: 1, b: 1, normal: 2},
 			],
 			clutch2: [
-				{fun: "disk"       , offset: -3, radius: RXY, r:0, g: 0, b: 0, normal: 2},
+				{fun: "disk"       , offset: -3, radius: RXY, r:1, g: 1, b: 1, normal: 2},
 				{fun: "plane"      , offset: -2             , r:1, g: 0, b: 0, normal: 2},
-				{fun: "disk"       , offset: -1, radius: RXY, r:1, g: 1, b: 1, normal: 2},
+				{fun: "disk"       , offset: -1, radius: RXY, r:0, g: 0, b: 0, normal: 2},
 
 				{fun: "disk"       , offset: +1, radius: RXY, r:0, g: 0, b: 0, normal: 2},
 				{fun: "plane"      , offset: +2             , r:1, g: 0, b: 0, normal: 2},
